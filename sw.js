@@ -1,9 +1,9 @@
 /* Opportuniste — service worker. Incrémente CACHE à chaque mise à jour de l'app. */
-const CACHE = 'oppo-v2';
+const CACHE = 'oppo-v3';
 const ASSETS = [
   './',
   './index.html',
-  './manifest.webmanifest',
+  './manifest.json',
   './icon-192.png',
   './icon-512.png',
   './icon-maskable-192.png',

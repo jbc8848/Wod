@@ -1,7 +1,7 @@
 <!DOCTYPE html><html lang="fr"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#F7F5F1">
-<link rel="manifest" href="manifest.webmanifest">
+<link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="icon-192.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
@@ -76,6 +76,11 @@ details[open]>summary::before{content:'▾ '}
 </style></head>
 <body><div class="wrap">
 <div class="kicker">OPPORTUNISTE</div>
+<div id="inst" style="display:none;background:var(--ink);color:#F7F5F1;border-radius:var(--r);padding:14px;margin:10px 0">
+ <div style="font-weight:800;font-size:14px">Installer l'application</div>
+ <div id="instTxt" style="font-size:12.5px;color:rgba(247,245,241,.7);margin-top:4px"></div>
+ <button id="instBtn" class="btn" style="background:#F7F5F1;color:var(--ink);margin-top:10px;display:none">Installer</button>
+</div>
 <h1>Séances opportunistes</h1>
 <div class="sub">Ce que tu peux faire là où tu es, avec ce que tu as. WOD et benchmarks nommés d'un côté, séances montées sur mesure de l'autre — orientation grimpeur-alpiniste : tirage, tronc, dénivelé, port de charge.</div>
 <div class="note"><b>48 séances</b> + 2 programmes évolutifs. Filtre par type, contexte, matériel et durée. Le contexte <b>Voyage</b> isole ce qui tient dans 2 m², sans matériel et sans bruit — chambre d'hôtel, refuge, aéroport. Le fractionné course et home-trainer reste dans <b>Conditionnement</b>.</div>
@@ -561,6 +566,28 @@ document.addEventListener('DOMContentLoaded',()=>{
   if(e.code==='Space'){e.preventDefault();$('#pMain').click()}if(e.key==='Escape')close_()})});
 
 /* ── PWA ──────────────────────────────────────────────────── */
+/* ── Installation ─────────────────────────────────────────── */
+(function(){
+ const box=document.getElementById('inst'),txt=document.getElementById('instTxt'),btn=document.getElementById('instBtn');
+ const standalone=(window.matchMedia&&window.matchMedia('(display-mode: standalone)').matches)||window.navigator.standalone===true;
+ if(standalone)return; /* déjà installée */
+ const ios=/iPad|iPhone|iPod/.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
+ const safari=/Safari/.test(navigator.userAgent)&&!/CriOS|FxiOS|EdgiOS|Chrome/.test(navigator.userAgent);
+ let prompt_=null;
+ window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();prompt_=e;
+  txt.textContent="Pour l'avoir en plein écran et hors ligne.";btn.style.display='block';box.style.display='block'});
+ btn.onclick=async()=>{if(!prompt_)return;prompt_.prompt();await prompt_.userChoice;prompt_=null;box.style.display='none'};
+ if(location.protocol==='file:'){
+  box.style.display='block';
+  txt.textContent="Le fichier est ouvert en local (file://). Une PWA exige une adresse https — publie le dossier sur GitHub Pages, puis installe depuis cette adresse.";return}
+ if(ios){box.style.display='block';
+  txt.textContent=safari
+   ? "iPhone : bouton Partager (carré avec flèche, en bas) → faire défiler → « Sur l'écran d'accueil ». iOS n'affiche jamais de bouton d'installation automatique."
+   : "Sur iPhone, l'installation ne marche que depuis Safari. Rouvre cette adresse dans Safari, puis Partager → « Sur l'écran d'accueil »."}
+ else{setTimeout(()=>{if(!prompt_&&box.style.display!=='block'){box.style.display='block';
+   txt.textContent="Android/Chrome : menu ⋮ → « Installer l'application » ou « Ajouter à l'écran d'accueil ». Si l'option manque, vérifie que l'adresse est bien en https et recharge la page."}},2500)}
+})();
+
 if('serviceWorker' in navigator){
  window.addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}))}
 /* Garder l'écran allumé pendant une séance (Wake Lock, si dispo) */
