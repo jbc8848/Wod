@@ -1,0 +1,574 @@
+<!DOCTYPE html><html lang="fr"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#F7F5F1">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Opportuniste">
+<title>Opportuniste</title><style>
+:root{--bg:#F7F5F1;--card:#FFFFFF;--line:rgba(24,26,30,.10);--ink:#181A1E;--muted:#6A6F78;
+--hot:#8C3B2E;--cool:#2F5D57;--amber:#A8802F;--r:12px;
+--font:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;--mono:ui-monospace,'SF Mono',Menlo,monospace}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+body{font-family:var(--font);background:var(--bg);color:var(--ink);line-height:1.45;-webkit-font-smoothing:antialiased}
+.wrap{max-width:560px;margin:0 auto;padding:18px 16px calc(30px + env(safe-area-inset-bottom))}
+h1{font-size:24px;font-weight:700;letter-spacing:-.02em;margin:6px 0 2px}
+.sub{color:var(--muted);font-size:13.5px;margin-bottom:16px}
+.kicker{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);font-weight:700}
+h2{font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);font-weight:800;margin:20px 0 8px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:14px;margin-bottom:8px}
+.rname{font-weight:800;font-size:14.5px}
+.rmeta{font-family:var(--mono);font-size:11px;color:var(--muted);margin-top:2px}
+.btn{display:block;width:100%;border:none;border-radius:999px;padding:14px;font-family:var(--font);font-weight:700;font-size:15px;cursor:pointer;text-align:center}
+.btn-ghost{background:none;border:1.5px solid var(--line);color:var(--ink)}
+.hint{font-size:12.5px;color:var(--muted)}
+.note{font-size:13px;color:var(--muted);background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:12px 14px;margin:14px 0}
+.note b{color:var(--ink)}
+/* filtres */
+.filters{position:sticky;top:0;background:var(--bg);padding:8px 0 6px;z-index:10;margin:0 -16px;padding-left:16px;padding-right:16px;border-bottom:1px solid var(--line)}
+.frow{display:flex;gap:6px;overflow-x:auto;padding-bottom:6px;scrollbar-width:none}
+.frow::-webkit-scrollbar{display:none}
+.chip{flex:0 0 auto;border:1.5px solid var(--line);background:var(--card);color:var(--muted);border-radius:999px;padding:7px 13px;font-family:var(--font);font-size:12.5px;font-weight:700;cursor:pointer;white-space:nowrap}
+.chip.on{background:var(--ink);border-color:var(--ink);color:#F7F5F1}
+.flabel{font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);font-weight:800;margin:2px 0 5px}
+/* tags séance */
+.tags{display:flex;flex-wrap:wrap;gap:5px;margin-top:8px}
+.tag{font-family:var(--mono);font-size:10px;letter-spacing:.04em;text-transform:uppercase;border:1px solid var(--line);border-radius:999px;padding:3px 8px;color:var(--muted)}
+.tag.dur{color:var(--cool);border-color:rgba(47,93,87,.3)}
+.tag.bench{color:var(--hot);border-color:rgba(140,59,46,.32)}
+.tag.trip{color:var(--amber);border-color:rgba(168,128,47,.35)}
+details{margin-top:10px}
+summary{cursor:pointer;font-weight:800;font-size:13px;padding:6px 0;color:var(--muted);list-style:none}
+summary::-webkit-details-marker{display:none}
+summary::before{content:'▸ ';font-size:11px}
+details[open]>summary::before{content:'▾ '}
+.steps{padding-left:18px;font-size:13.5px;margin:2px 0 4px}
+.steps li{margin-bottom:5px}
+.ex{border-top:1px solid var(--line);padding:8px 0 0;margin-top:6px}
+.ex b{font-size:13px}
+.ex p{font-size:12.5px;color:var(--muted);margin-top:2px}
+.hist{font-family:var(--mono);font-size:11.5px;color:var(--muted);padding:4px 0;border-bottom:1px solid var(--line)}
+/* lecteur */
+#player{position:fixed;inset:0;background:var(--ink);color:#F7F5F1;display:none;flex-direction:column;z-index:50}
+#player.on{display:flex}
+.p-top{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:16px 18px;font-size:11.5px;letter-spacing:.1em;text-transform:uppercase;font-weight:700;color:rgba(247,245,241,.65)}
+#pTitle{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.p-quit{flex:0 0 auto;background:none;border:1px solid rgba(247,245,241,.3);color:inherit;border-radius:999px;padding:6px 14px;font-weight:700;font-size:11.5px;cursor:pointer}
+.p-mid{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:8px;padding:0 22px}
+.dial{position:relative;width:min(74vw,270px);aspect-ratio:1}
+.dial svg{width:100%;height:100%;transform:rotate(-90deg)}
+.dial circle{fill:none;stroke-width:6;stroke-linecap:round}
+.dial .bgc{stroke:rgba(247,245,241,.14)}
+.dial .fgc{stroke:#F7F5F1;transition:stroke .2s}
+.dial.work .fgc{stroke:#E4B36A}
+.dial.rest .fgc{stroke:#7FB3AB}
+.p-inner{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px}
+.p-count{font-family:var(--mono);font-size:clamp(46px,15vw,66px);font-weight:700;line-height:1;font-variant-numeric:tabular-nums}
+.p-label{font-size:15px;font-weight:800;letter-spacing:.02em}
+.p-sub{font-size:12.5px;color:rgba(247,245,241,.6);font-family:var(--mono)}
+.p-score{width:100%;max-width:280px;background:rgba(247,245,241,.08);border:1px solid rgba(247,245,241,.25);color:#F7F5F1;border-radius:10px;padding:11px 14px;font-family:var(--font);font-size:14px;text-align:center}
+.p-score::placeholder{color:rgba(247,245,241,.45)}
+.p-ctrl{display:flex;gap:10px;justify-content:center;padding:0 18px calc(26px + env(safe-area-inset-bottom))}
+.p-btn{flex:1;max-width:200px;border:none;border-radius:999px;padding:16px;font-weight:800;font-size:15px;font-family:var(--font);cursor:pointer;background:#F7F5F1;color:var(--ink)}
+.p-btn.ghost{background:none;border:1.5px solid rgba(247,245,241,.35);color:#F7F5F1}
+@media(prefers-reduced-motion:reduce){*{transition:none!important}}
+</style></head>
+<body><div class="wrap">
+<div class="kicker">OPPORTUNISTE</div>
+<h1>Séances opportunistes</h1>
+<div class="sub">Ce que tu peux faire là où tu es, avec ce que tu as. WOD et benchmarks nommés d'un côté, séances montées sur mesure de l'autre — orientation grimpeur-alpiniste : tirage, tronc, dénivelé, port de charge.</div>
+<div class="note"><b>48 séances</b> + 2 programmes évolutifs. Filtre par type, contexte, matériel et durée. Le contexte <b>Voyage</b> isole ce qui tient dans 2 m², sans matériel et sans bruit — chambre d'hôtel, refuge, aéroport. Le fractionné course et home-trainer reste dans <b>Conditionnement</b>.</div>
+
+<div class="filters">
+<div class="flabel">Programmes évolutifs</div><div class="frow" id="fProg"></div>
+<div class="flabel">Type</div><div class="frow" id="fType"></div>
+<div class="flabel">Contexte</div><div class="frow" id="fCtx"></div>
+<div class="flabel">Matériel</div><div class="frow" id="fEq"></div>
+<div class="flabel">Durée</div><div class="frow" id="fDur"></div>
+</div>
+
+<div id="list"></div>
+
+<h2 style="font-size:14px;color:var(--ink);margin-top:26px">Programmes évolutifs</h2>
+<div id="progs"></div>
+
+<h2>Substitutions</h2>
+<div class="card">
+<div style="font-size:13px;margin-bottom:6px"><b>Pas de barre</b> — tractions → tirage sur table/rebord, ou rowing australien sous une barre basse</div>
+<div style="font-size:13px;margin-bottom:6px"><b>Pas de box</b> — step-ups → escalier, banc, muret, ou fentes marchées</div>
+<div style="font-size:13px;margin-bottom:6px"><b>Pas de kettlebell</b> — swings → sac à dos chargé tenu par les sangles, goblet → bidon d'eau</div>
+<div style="font-size:13px;margin-bottom:6px"><b>Pas de dénivelé</b> — montées → 2 min de corde, navettes, ou burpees</div>
+<p class="hint">Principe : on substitue par le temps d'effort et la filière sollicitée, jamais par un compte arbitraire de répétitions.</p>
+</div>
+
+<h2>Historique local</h2><div id="hist"></div>
+</div>
+
+<div id="player">
+<div class="p-top"><span id="pTitle"></span><button class="p-quit" id="pQuit">Quitter</button></div>
+<div class="p-mid">
+ <div class="dial" id="pDial"><svg viewBox="0 0 100 100"><circle class="bgc" cx="50" cy="50" r="45"></circle><circle class="fgc" id="pArc" cx="50" cy="50" r="45" stroke-dasharray="283" stroke-dashoffset="0"></circle></svg>
+  <div class="p-inner"><div class="p-count" id="pCount">0:00</div><div class="p-label" id="pLabel"></div><div class="p-sub" id="pSub"></div></div></div>
+ <input class="p-score" id="pScore" placeholder="Score : tours, reps, ressenti" style="display:none">
+</div>
+<div class="p-ctrl"><button class="p-btn" id="pMain">Démarrer</button><button class="p-btn ghost" id="pSave">Terminer &amp; noter</button></div></div>
+
+<script>
+const NS='oppo:',$=s=>document.querySelector(s);
+const store={g:(k,d)=>{try{const v=localStorage.getItem(NS+k);return v?JSON.parse(v):d}catch(e){return d}},
+ s:(k,v)=>{try{localStorage.setItem(NS+k,JSON.stringify(v))}catch(e){}}};
+
+/* ── Bibliothèque d'exercices ─────────────────────────────── */
+const EX={
+tract:["Traction stricte","Départ bras tendus, épaules actives (omoplates basses et serrées) avant de tirer. Menton au-dessus de la barre, descente contrôlée en 2 s. Buste légèrement en arrière, coudes ramenés vers les hanches — le geste du grimpeur, pas celui du culturiste."],
+tractneg:["Négative","Monte en sautant ou en t'aidant des jambes, puis descends en 5 s pleines, sans lâcher la tension. La façon la plus sûre de charger le tendon quand les tractions strictes manquent."],
+scap:["Tirage omoplates","Suspendu bras tendus, épaules aux oreilles, puis abaisse et rapproche les omoplates sans plier les coudes. 2 s en haut. Réveille la ceinture scapulaire et protège l'épaule avant tout tirage."],
+row:["Rowing australien","Barre basse, table ou rebord : corps gainé en planche inversée, tire la poitrine vers la barre, coudes le long du corps. Plus les pieds sont hauts, plus c'est dur."],
+pompe:["Pompe","Mains sous les épaules, corps en ligne du talon à la nuque, coudes à 45° du buste. Poitrine à un poing du sol, remontée complète. Ne laisse pas les hanches tomber."],
+pompepiq:["Pompe piquée","Hanches hautes en V inversé, descends le sommet du crâne vers le sol entre les mains. Sollicite l'épaule verticalement — l'antagoniste direct du tirage."],
+pompearch:["Pompe archer","Mains très écartées, descends d'un seul côté en tendant le bras opposé. Étape vers la pompe à un bras, utile pour l'asymétrie de force du grimpeur."],
+dips:["Dips sur banc","Mains derrière toi sur un banc ou une chaise, coudes vers l'arrière, descends jusqu'à 90°. Épaules basses, jamais enroulées vers l'avant."],
+pushpress:["Push press","Charge en position rack, léger fléchissement de jambes puis extension explosive pour lancer la charge au-dessus de la tête. Verrouille bras tendus, côtes basses."],
+hollow:["Hollow hold","Dos plaqué au sol, lombaires collées, bras et jambes tendus décollés. Si les lombaires décollent, replie les genoux. Le gainage de base du grimpeur en dévers."],
+hollowr:["Hollow rocks","Position hollow tenue, balance-toi d'avant en arrière comme un patin. Le gainage ne se relâche à aucun moment."],
+gainage:["Planche","Avant-bras sous les épaules, fessiers serrés, bassin en rétroversion. Ce n'est pas une posture de repos : pousse activement le sol."],
+gainlat:["Gainage latéral","Sur un avant-bras, hanche haute, corps en ligne vue de face. Chaîne latérale — celle qui te tient sur les pieds en traversée."],
+lsit:["L-sit","Assis mains au sol ou suspendu à la barre, jambes tendues à l'horizontale. Genoux repliés si besoin (tuck sit). Chrono en secondes, pas en répétitions."],
+flt:["Front lever groupé","Suspendu, bascule le bassin pour amener le dos à l'horizontale, genoux à la poitrine, bras tendus. Tiens 5-10 s. Le pont entre tronc et tirage."],
+superman:["Superman","À plat ventre, décolle bras et jambes en gardant la nuque longue. Chaîne postérieure, contrepoids indispensable au volume de tirage."],
+squat:["Squat","Pieds largeur de bassin, descends hanches sous les genoux si la mobilité le permet, buste fier, poids réparti sur tout le pied."],
+squatj:["Squat sauté","Squat complet puis extension explosive, réception amortie genoux souples. Enchaîne sans marquer d'arrêt en bas."],
+goblet:["Goblet squat","Charge tenue contre la poitrine, coudes à l'intérieur des genoux en bas. La charge devant t'oblige à garder le buste vertical."],
+fente:["Fente marchée","Grand pas, genou arrière proche du sol, buste vertical, poussée sur le talon avant. Alterne sans t'arrêter."],
+bulg:["Fente bulgare","Pied arrière surélevé sur un banc, descente lente sur la jambe avant. Le vrai geste de la montée en pas d'escalade."],
+pistol:["Squat sur une jambe","Une jambe tendue devant, descente contrôlée sur l'autre. Progression : à une marche haute, puis de plus en plus bas, puis complet avec contrepoids aux bras."],
+stepup:["Montée de box","Pied entier sur la box, pousse sur le talon sans t'aider d'une impulsion de la jambe arrière. Extension complète en haut, redescente contrôlée."],
+stepsac:["Montée lestée","Même geste avec le sac sur le dos, sangles serrées. Cadence régulière de 15-17 par minute : c'est la cadence d'approche en montagne."],
+escal:["Escalier","Deux marches à la fois en poussée sur le talon, ou une par une en cadence rapide. Descente toujours en marchant — la descente rapide coûte plus qu'elle ne rapporte."],
+kbswing:["Swing kettlebell","Charnière de hanche, pas un squat : la charge passe entre les jambes, puis extension explosive des hanches. Les bras ne font que suivre. Arrêt à hauteur de poitrine."],
+clean:["Clean kettlebell","De la balançoire, remonte la charge en position rack contre l'avant-bras sans qu'elle retombe sur le poignet. Coude serré le long du corps."],
+farmer:["Port de charge","Une charge dans chaque main, épaules basses, buste droit, pas courts et rapides. Le grip lâche avant les jambes — c'est le but."],
+burpee:["Burpee","Poitrine au sol, puis remontée et saut avec mains au-dessus de la tête. Sur les longues séries, marche les pieds au lieu de sauter pour tenir la cadence."],
+mount:["Grimpeur au sol","Position de pompe, ramène alternativement les genoux à la poitrine sans que les hanches montent. Rapide mais gainé."],
+bear:["Marche de l'ours","À quatre pattes, genoux à 3 cm du sol, avance main et pied opposés. Dos plat, bassin stable — si le bassin roule, ralentis."],
+sautbox:["Saut sur box","Impulsion deux pieds, réception complète sur la box. Redescends en marchant, jamais en rebond : le tendon d'Achille te remerciera."],
+coiffe:["Rotation externe","Coude au corps à 90°, élastique ou charge légère, ouvre l'avant-bras vers l'extérieur lentement. Prévention d'épaule, série longue et légère."],
+poign:["Extension poignets/doigts","Élastique autour des doigts ou main dans le sable/riz : ouvre contre résistance. L'antagoniste direct des fléchisseurs de doigts."],
+saut:["Saut en longueur enchaîné","Saut horizontal deux pieds, réception amortie, repart aussitôt. Explosivité et réception — utile sur terrain instable."],
+corde:["Double-under","Un tour de corde supplémentaire par saut : impulsion plus haute, poignets qui accélèrent, coudes près du corps. Si le geste n'est pas acquis, compte 2 sauts simples pour 1 double."],
+situp:["Sit-up","Plante des pieds au sol, mains qui touchent le sol derrière la tête puis les orteils. Enroule la colonne vertèbre par vertèbre au lieu de tirer sur la nuque."],
+wallball:["Lancer-squat","Charge tenue à la poitrine, squat complet, puis extension explosive qui lance la charge vers une cible haute ou verticalement. Rattrape en amortissant directement dans le squat suivant."],
+sumohp:["Sumo high pull","Charge entre les jambes, pieds larges : extension de hanches puis tirage vertical, coudes plus hauts que les mains, charge au menton."],
+arriere:["Course en arrière","Petits pas, regard par-dessus l'épaule, terrain parfaitement dégagé. Sollicite les quadriceps en excentrique — courbatures garanties les premières fois."],
+gilet:["Lest porté","Gilet 9 kg ou sac serré haut sur le dos. Le lest change la mécanique : raccourcis les amplitudes de tirage avant de dégrader la posture."],
+course:["Course","Sur les WOD, la course est un transport, pas un test : allure régulière qui te laisse enchaîner le bloc de force derrière. Substituable par le temps (voir plus bas)."],
+pikeel:["Pompe piquée surélevée","Pieds sur une box ou une chaise, hanches au-dessus des épaules : plus les pieds montent, plus la poussée devient verticale. Descends le sommet du crâne entre les mains, coudes à 45°."],
+wallwalk:["Marche murale","Départ en pompe pieds au mur, marche les mains vers le mur en montant les pieds jusqu'à la position verticale, puis redescends de la même façon. Gainage total : ne laisse jamais le dos se creuser."],
+wallhold:["Tenue murale faciale","Équilibre poitrine face au mur (montée en marche murale), seuls les orteils touchent. Pousse le sol, côtes rentrées, regarde entre les mains. C'est ici que se construit l'épaule du HSPU."],
+hspuneg:["Négative de HSPU","En équilibre au mur, descends en 4-5 s jusqu'à ce que la tête effleure le sol (ou un livre), puis repose les pieds et remonte en marche murale. Le contrôle de la descente EST l'exercice."],
+hspu:["Handstand push-up au mur","Dos ou face au mur, descends tête au sol et repousse jusqu'aux bras tendus. Amplitude complète, pas de rebond sur le crâne. Version stricte : sans kip des jambes."],
+tractlest:["Traction lestée","Traction stricte avec charge à la ceinture. Échauffe par paliers (à vide, mi-charge, charge). C'est le socle de force de la traction à un bras — pas une option."],
+archpull:["Traction archer","Barre large : tire-toi vers une main, l'autre bras finit tendu sur la barre. Le bras tendu assiste de moins en moins à mesure que tu progresses. Alterne les côtés."],
+uneven:["Traction inégale","Une main sur la barre, l'autre plus bas (sangle, serviette, anneau). Plus la deuxième prise est basse, plus le bras haut travaille seul. Descends la prise d'assistance semaine après semaine."],
+oapneg:["Négative à un bras","Monte à deux bras, lâche une main, descends sur un bras en 5-8 s. Coude JAMAIS verrouillé brutalement en bas : termine la descente avant l'extension complète les premières semaines. L'exercice le plus efficace — et le plus risqué pour le coude."],
+oapassist:["Traction 1 bras assistée","Un bras sur la barre, l'autre main sur un élastique fin, une serviette ou tenant ton propre poignet. Réduis l'assistance progressivement : élastique plus fin, main qui descend le long de l'avant-bras."],
+lockoff:["Lock-off unilatéral","Monte à deux bras, lâche une main et tiens la position coude fléchi (90° puis 120°). 5-10 s par position. Construit la force de maintien aux angles où l'OAP casse."],
+chaise:["Chaise au mur","Dos plaqué au mur, cuisses à l'horizontale, mains sur les cuisses interdites. Totalement silencieux et bien plus dur qu'il n'y paraît — l'isométrie de jambes du grimpeur en position de repos forcé."],
+squattempo:["Squat tempo 3-1-1","Descente en 3 s, pause 1 s en bas, remontée en 1 s. Le tempo remplace la charge : au même nombre de répétitions, l'effort double, et sans un bruit."],
+pompetempo:["Pompe tempo 3-1-1","Descente en 3 s, pause poitrine à un poing du sol, remontée. La version silencieuse et rentable quand les répétitions rapides deviennent trop faciles."],
+fentesur:["Fente sur place","Fente alternée sans déplacement : un pas fixe, descente verticale du genou arrière. Zéro impact, zéro bruit, faisable entre un lit et un mur."],
+ponte:["Pont fessier une jambe","Allongé, un pied au sol, l'autre jambe tendue : monte le bassin en poussant sur le talon. Chaîne postérieure sans aucun matériel ni bruit."]
+};
+
+/* ── Séances ──────────────────────────────────────────────── */
+const EQ={rien:'Sans matériel',barre:'Barre / rebord',lest:'Sac ou KB',deniv:'Marches / box',course:'Extérieur'};
+const DUR={c:'10-15 min',m:'20-30 min',l:'40-60 min'};
+const TYPE={bench:'Benchmarks & WOD',oppo:'Séances opportunistes'};
+const CTX={voyage:'Voyage · 2 m², silencieux'};
+
+/* ── Programmes évolutifs ─────────────────────────────────── */
+const PROG=[
+{id:'hspu',n:"Handstand push-up",obj:"3 × 5 HSPU stricts au mur",
+ intro:"Poussée verticale complète — l'antagoniste que ton volume de tirage réclame. 2 séances/semaine, 48 h d'écart, jamais le jour d'une grosse séance d'épaules ou de doigts.",
+ note:"Test de placement : commence au niveau dont tu rates le critère de passage. Avec ton fond de force, le niveau 1 devrait tomber vite — mais ne saute pas la tenue murale : c'est elle qui protège l'épaule et le poignet.",
+ lv:[
+ {t:"Pompe piquée au sol",crit:"3 × 12 propres, tête qui effleure le sol",
+  s:{n:"HSPU · Niveau 1",f:"EMOM · 12 min",x:["pompepiq","gainage","poign"],
+   d:["Échauffement 8 min : poignets soignés (cercles, appuis progressifs), épaules","EMOM 12 : minutes impaires → 6-10 pompes piquées · minutes paires → 30 s de planche","Amplitude avant volume : la tête effleure le sol à chaque rép","Critère de passage : 3 × 12 hors minuteur, un jour frais"],tm:{m:'emom',e:60,n:12}}},
+ {t:"Pompe piquée surélevée",crit:"3 × 8 pieds sur box, amplitude complète",
+  s:{n:"HSPU · Niveau 2",f:"EMOM · 12 min",x:["pikeel","wallwalk","poign"],
+   d:["Échauffement 8 min poignets + 2 séries de piquées au sol","EMOM 12 : minutes impaires → 5-8 piquées surélevées · minutes paires → 1 marche murale lente","Monte la box au fil des semaines : plus les hanches sont au-dessus des épaules, mieux c'est","Critère de passage : 3 × 8 amplitude complète, un jour frais"],tm:{m:'emom',e:60,n:12}}},
+ {t:"Tenue murale faciale",crit:"60 s cumulées en tenue propre, sans creuser",
+  s:{n:"HSPU · Niveau 3",f:"6 × 30/60 s",x:["wallhold","wallwalk","pikeel"],
+   d:["Échauffement 10 min : poignets, épaules, 2 marches murales faciles","6 rounds : 20-30 s de tenue murale faciale / 60 s de repos","Pousse activement le sol, côtes rentrées — sors AVANT que la posture casse","Critère de passage : 60 s d'un bloc, alignement tenu"],tm:{m:'interval',w:30,r:60,n:6}}},
+ {t:"Négatives au mur",crit:"3 × 5 négatives de 5 s, sans chute",
+  s:{n:"HSPU · Niveau 4",f:"8 × 40/80 s",x:["hspuneg","wallhold","pikeel"],
+   d:["Échauffement 10 min + 2 tenues murales de 20 s","8 rounds : 1-2 négatives de 4-5 s dans les 40 s d'effort / 80 s de repos","Un livre ou un coussin plat sous la tête donne le repère de profondeur","Critère de passage : 3 × 5 négatives contrôlées à 5 s"],tm:{m:'interval',w:40,r:80,n:8}}},
+ {t:"HSPU au mur",crit:"3 × 5 stricts — objectif atteint",
+  s:{n:"HSPU · Niveau 5",f:"10 × 40/80 s",x:["hspu","hspuneg","wallhold"],
+   d:["Échauffement 12 min complet + 2 négatives lentes","10 rounds : 1-3 HSPU dans les 40 s / 80 s de repos — qualité stricte, arrête la série dès que le kip apparaît","Si une rép échoue : bascule en négative de 5 s, ne t'écrase pas","Objectif : 3 × 5 stricts. Ensuite : volume (5 × 5), déficit (mains surélevées), ou libre"],tm:{m:'interval',w:40,r:80,n:10}}}]},
+
+{id:'oap',n:"Traction à un bras",obj:"1 OAP propre par bras",
+ intro:"Le graal du tirage. Avec +28 kg × 3, ton socle bilatéral est déjà sérieux : le chantier est unilatéral. 2 séances/semaine max, jamais accolées à une séance de doigts intense — le coude encaisse tout.",
+ note:"Règle d'or : au premier signe de douleur en face interne du coude (épitrochlée), redescends d'un niveau une semaine et double les extenseurs. Une OAP se gagne en mois, se perd en une tendinite.",
+ lv:[
+ {t:"Socle lesté",crit:"Traction +45 % du poids de corps × 1 (≈ +32 kg pour 72 kg)",
+  s:{n:"OAP · Niveau 1",f:"EMOM · 16 min",x:["tractlest","scap","coiffe","poign"],
+   d:["Échauffement 12 min : tirages omoplates, tractions à vide, paliers de charge","EMOM 16 : minutes impaires → 2-3 tractions lestées (~80 % du max) · minutes paires → 8 rotations externes légères","Charge stricte, pas d'élan — le lest se gagne par 1-2 kg","Critère de passage : +45 % PDC × 1 propre, un jour frais"],tm:{m:'emom',e:60,n:16}}},
+ {t:"Archer & inégales",crit:"3 × 5 archers par côté, bras d'appui quasi tendu",
+  s:{n:"OAP · Niveau 2",f:"8 × 45/75 s",x:["archpull","uneven","coiffe","poign"],
+   d:["Échauffement 12 min + 2 tractions lestées légères de rappel","8 rounds : 3-5 archers (alterne le côté à chaque round) / 75 s de repos","Semaines suivantes : remplace progressivement par des inégales, prise d'assistance de plus en plus basse","Critère de passage : 3 × 5 par côté, assistance minimale"],tm:{m:'interval',w:45,r:75,n:8}}},
+ {t:"Négatives à un bras",crit:"5 négatives de 6-8 s par bras",
+  s:{n:"OAP · Niveau 3",f:"10 × 30/90 s",x:["oapneg","lockoff","coiffe","poign"],
+   d:["Échauffement 15 min complet, coudes très progressivement — non négociable","10 rounds : 1 négative à un bras (alterne les bras) / 90 s de repos","Descente en 5-8 s, arrêt AVANT l'extension complète du coude les 3 premières semaines","Critère : 5 négatives de 6-8 s par bras — et zéro douleur au coude le lendemain"],tm:{m:'interval',w:30,r:90,n:10}}},
+ {t:"OAP assistée",crit:"3 × 2 par bras avec assistance minimale",
+  s:{n:"OAP · Niveau 4",f:"10 × 30/90 s",x:["oapassist","oapneg","lockoff","coiffe"],
+   d:["Échauffement 15 min + 2 négatives de rappel par bras","10 rounds : 1-2 OAP assistées (élastique fin, serviette ou main sur le poignet) / 90 s","Réduis l'assistance chaque semaine : élastique plus fin, main plus basse sur l'avant-bras","Critère : 3 × 2 par bras, assistance symbolique"],tm:{m:'interval',w:30,r:90,n:10}}},
+ {t:"Tentatives & lock-offs",crit:"1 OAP propre par bras — objectif atteint",
+  s:{n:"OAP · Niveau 5",f:"8 × 30/120 s",x:["lockoff","oapassist","oapneg"],
+   d:["Échauffement 15 min complet + montée en intensité par assistées","8 rounds : 1 tentative d'OAP ou 1 lock-off à 90° puis 120° (10 s) / 120 s de repos plein","Maximum 3 vraies tentatives par séance — au-delà, c'est du jus de coude gaspillé","Objectif : 1 OAP par bras. Ensuite : 2-3 d'affilée, ou retour au lest bilatéral lourd"],tm:{m:'interval',w:30,r:120,n:8}}}]}
+];
+
+const W=[
+/* ── court ── */
+{n:"Tabata tronc",f:"8 × 20/10 · 4 min",d:"c",eq:["rien"],v:1,
+ s:["Échauffement 5 min : mobilité hanches et épaules, 20 grimpeurs au sol","8 rounds de 20 s d'effort / 10 s de repos, en alternant : hollow hold → gainage latéral droit → hollow rocks → gainage latéral gauche, et on recommence","Aucun relâchement pendant les 20 s — si le dos décolle, replie les genoux","Note ta qualité de tenue, pas un score"],
+ x:["hollow","hollowr","gainlat"],tm:{m:'tabata',w:20,r:10,n:8}},
+
+{n:"EMOM 12 tirage-poussée",f:"EMOM · 12 min",d:"c",eq:["barre","rien"],
+ s:["Échauffement 6 min : 2 × 10 tirages omoplates, cercles de bras, 10 pompes lentes","Minutes impaires : 5 tractions strictes · minutes paires : 12 pompes","Le repos, c'est ce qui reste de la minute — si tu descends sous 15 s de repos, baisse les reps","Le format le plus rentable quand tu n'as qu'un quart d'heure"],
+ x:["scap","tract","pompe","row"],tm:{m:'emom',e:60,n:12}},
+
+{n:"AMRAP 10 escaliers",f:"AMRAP · 10 min",d:"c",eq:["deniv"],
+ s:["Échauffement 5 min : montées faciles, mollets, chevilles","AMRAP 10 min : 1 volée d'escalier en montée (≈ 15-20 marches) → 5 squats sautés en haut → descente en marchant","Cadence tenable dès le premier tour : c'est un effort continu, pas un sprint","Score = nombre de tours"],
+ x:["escal","squatj"],tm:{m:'amrap',t:600}},
+
+{n:"Tabata montées lestées",f:"8 × 20/10 · 4 min",d:"c",eq:["lest","deniv"],
+ s:["Échauffement 6 min à vide, hanches et mollets","8 rounds de 20 s de montées de box avec le sac (8-12 kg) / 10 s de repos","Change de jambe d'attaque à chaque round","Score = total de montées"],
+ x:["stepsac","stepup"],tm:{m:'tabata',w:20,r:10,n:8}},
+
+{n:"Chipper express",f:"For time · cap 12 min",d:"c",eq:["rien"],
+ s:["Échauffement 6 min","Dans l'ordre, sans repos imposé : 60 squats → 50 grimpeurs au sol → 40 fentes marchées → 30 pompes → 20 burpees","Fractionne d'avance plutôt que d'aller à l'échec sur le premier bloc","Note ton temps (repère : 8-11 min)"],
+ x:["squat","mount","fente","pompe","burpee"],tm:{m:'chrono'}},
+
+{n:"Grip & poussée express",f:"5 tours · for time",d:"c",eq:["lest"],
+ s:["Échauffement 5 min + 2 portages légers","5 tours : 40 m de port de charge (2 × 16-20 kg ou sac dans chaque main) → 10 pompes","Pose la charge seulement en fin de portage : le grip doit être la limite","Note ton temps (repère : 9-13 min)"],
+ x:["farmer","pompe"],tm:{m:'chrono'}},
+
+{n:"Échelle de tractions",f:"AMRAP · 12 min",d:"c",eq:["barre"],
+ s:["Échauffement 7 min : suspensions, tirages omoplates, 2 séries faciles","AMRAP 12 min en échelle : 1 traction → 10 squats, 2 tractions → 10 squats, 3 tractions… tant que les tractions restent strictes","Dès qu'une traction part en élan, redescends à 1 et repars","Score = dernier barreau atteint"],
+ x:["scap","tract","tractneg","squat"],tm:{m:'amrap',t:720}},
+
+/* ── moyen ── */
+{n:"AMRAP 20 grimpeur",f:"AMRAP · 20 min",d:"m",eq:["barre","rien"],
+ s:["Échauffement 8 min complet, épaules et hanches","AMRAP 20 min : 5 tractions strictes → 10 pompes → 15 hollow rocks → 20 fentes marchées","Le tronc lâche avant les bras — c'est justement là que ça travaille","Score = nombre de tours (repère : 9-13)"],
+ x:["tract","pompe","hollowr","fente"],tm:{m:'amrap',t:1200}},
+
+{n:"EMOM 24 alpin",f:"EMOM · 24 min · 4 stations",d:"m",eq:["lest","deniv","rien"],
+ s:["Échauffement 8 min","6 cycles de 4 minutes : min 1 → 20 montées lestées · min 2 → 12 swings ou 30 s de gainage · min 3 → 12 pompes · min 4 → 15 squats","Chaque minute doit finir avec au moins 10 s de repos, sinon allège","Format idéal en refuge ou en salle de sport d'hôtel"],
+ x:["stepsac","kbswing","gainage","pompe","squat"],tm:{m:'emom',e:60,n:24}},
+
+{n:"Endurance de force escaliers",f:"8 × 2 min / 1 min",d:"m",eq:["deniv","lest"],
+ s:["Échauffement 10 min progressif avec le sac","8 répétitions : 2 min de montée continue avec sac 10-12 kg / 1 min de récupération en descendant","Allure de montagne soutenue, pas de sprint — les jambes doivent brûler sans que le souffle explose","C'est du muscle, pas du cardio : si tu es essoufflé au point de ne plus parler, ralentis"],
+ x:["stepsac","escal"],tm:{m:'interval',w:120,r:60,n:8}},
+
+{n:"Quatre Tabata enchaînés",f:"4 blocs · 20/10 × 8",d:"m",eq:["rien"],
+ s:["Échauffement 8 min","Bloc 1 : squats · bloc 2 : pompes · bloc 3 : grimpeurs au sol · bloc 4 : burpees. Chaque bloc = 8 × 20 s / 10 s","1 min de repos entre les blocs — relance le minuteur à chaque fois","Score = total de répétitions du bloc le plus faible (le vrai Tabata se juge au round le plus bas)"],
+ x:["squat","pompe","mount","burpee"],tm:{m:'tabata',w:20,r:10,n:8}},
+
+{n:"Prévention épaules & poignets",f:"45/15 × 20 · 20 min",d:"m",eq:["rien"],v:1,
+ s:["Échauffement 6 min doux, jamais à froid","20 stations de 45 s / 15 s : rotations externes → tirages omoplates → superman → pompes piquées → gainage latéral, en boucle","Charge légère, amplitude complète, aucune douleur articulaire","À caler en jour de repos d'escalade ou après un gros bloc de doigts"],
+ x:["coiffe","scap","superman","pompepiq","poign","gainlat"],tm:{m:'interval',w:45,r:15,n:20}},
+
+{n:"Jambes unilatérales & tronc",f:"EMOM · 24 min",d:"m",eq:["rien","deniv"],v:1,
+ s:["Échauffement 8 min : hanches, chevilles, 20 squats","6 cycles de 4 min : min 1 → 8 fentes bulgares par jambe · min 2 → 30 s de L-sit ou tuck sit · min 3 → 6 squats sur une jambe par côté (à la marche si besoin) · min 4 → 20 hollow rocks","L'unilatéral corrige l'asymétrie que l'escalade installe","Note la progression : hauteur de marche, amplitude, propreté"],
+ x:["bulg","lsit","pistol","hollowr"],tm:{m:'emom',e:60,n:24}},
+
+{n:"Poids du corps en déplacement",f:"AMRAP · 25 min",d:"m",eq:["rien"],
+ s:["Échauffement 8 min","AMRAP 25 min : 10 burpees → 20 fentes marchées → 30 grimpeurs au sol → 40 s de planche","Zéro matériel, 3 m² suffisent — la séance de chambre d'hôtel ou de gîte","Score = nombre de tours (repère : 7-10)"],
+ x:["burpee","fente","mount","gainage"],tm:{m:'amrap',t:1500}},
+
+/* ── long ── */
+{n:"Chipper alpin",f:"For time · cap 50 min",d:"l",eq:["lest","deniv"],
+ s:["Échauffement 10 min avec le sac","Dans l'ordre : 400 montées de box avec sac ~11 kg → 100 pompes → 100 squats → 200 montées de box","Fractionne les montées par 50, cadence 15-17/min, sans t'asseoir","Note ton temps — c'est la marche d'approche du benchmark 1000 montées de Daily Workouts"],
+ x:["stepsac","pompe","squat"],tm:{m:'chrono'}},
+
+{n:"Cinq tours grimpeur",f:"5 tours · for time",d:"l",eq:["barre","lest"],
+ s:["Échauffement 10 min","5 tours : 40 montées lestées → 12 tractions → 25 pompes → 50 hollow rocks","Les tractions se dégradent au tour 3 : passe en séries de 3-4 dès le début plutôt que d'aller à l'échec","Note ton temps (repère : 38-52 min)"],
+ x:["stepsac","tract","tractneg","pompe","hollowr"],tm:{m:'chrono'}},
+
+{n:"Port de charge continu",f:"50 min · effort continu",d:"l",eq:["lest","deniv"],
+ s:["Échauffement 8 min à vide","50 min de montées ou de dénivelé continu avec sac 12-15 kg, allure conversationnelle stricte","Toutes les 10 min : 20 fentes marchées et 15 pompes, puis reprends sans t'asseoir","Le socle : c'est la séance qui ressemble le plus à une vraie course"],
+ x:["stepsac","escal","fente","pompe"],tm:{m:'chrono'}},
+
+{n:"EMOM 40 quatre stations",f:"EMOM · 40 min",d:"l",eq:["barre","lest","deniv"],
+ s:["Échauffement 10 min","10 cycles de 4 min : min 1 → 5 tractions · min 2 → 25 montées lestées · min 3 → 15 swings · min 4 → 40 s de gainage","La minute doit rester tenable jusqu'au bout : calibre sur ce que tu peux répéter 10 fois, pas sur ton maximum","Note le cycle où ça a commencé à casser"],
+ x:["tract","stepsac","kbswing","gainage"],tm:{m:'emom',e:60,n:40}},
+
+{n:"Marche de l'ours & burpees",f:"For time · cap 40 min",d:"l",eq:["rien"],
+ s:["Échauffement 10 min, poignets soignés","6 tours : 40 m de marche de l'ours → 15 burpees → 30 m de sauts en longueur enchaînés","Terrain dégagé, pieds nus ou chaussures souples si possible","Note ton temps (repère : 22-32 min)"],
+ x:["bear","burpee","saut","poign"],tm:{m:'chrono'}},
+
+{n:"Sac & barre",f:"6 tours · for time",d:"l",eq:["barre","lest","deniv"],
+ s:["Échauffement 10 min","6 tours : 200 m de port de charge → 8 tractions → 30 montées lestées → 12 push press","Le grip est la ressource limitante de la séance : le portage passe avant les tractions exprès","Note ton temps (repère : 42-58 min)"],
+ x:["farmer","tract","stepsac","pushpress"],tm:{m:'chrono'}},
+
+/* ── Voyage : 2 m², zéro matériel, zéro bruit ─────────────── */
+{n:"Réveil chambre d'hôtel",f:"EMOM · 10 min",d:"c",eq:["rien"],v:1,
+ s:["Échauffement 3 min : mobilité nuque, épaules, hanches, 10 squats lents","EMOM 10 en boucle : min 1 → 10 squats tempo 3-1-1 · min 2 → 8 pompes tempo · min 3 → 30 s de planche · min 4 → 12 fentes sur place · min 5 → 20 s de hollow hold","Aucun saut, aucun impact : le voisin du dessous ne saura rien","À caler avant le petit-déjeuner, en jour de transit ou de repos actif"],
+ x:["squattempo","pompetempo","gainage","fentesur","hollow"],tm:{m:'emom',e:60,n:10}},
+
+{n:"Isométrie totale",f:"45/15 × 12 · 12 min",d:"c",eq:["rien"],v:1,
+ s:["Échauffement 4 min doux","12 stations de 45 s / 15 s en boucle : chaise au mur → planche → gainage latéral droit → hollow hold → gainage latéral gauche → superman","Zéro mouvement, zéro bruit, effort réel — sors de la position avant que la posture casse, pas après","La séance d'aéroport, de train de nuit ou de chambre partagée"],
+ x:["chaise","gainage","gainlat","hollow","superman"],tm:{m:'interval',w:45,r:15,n:12}},
+
+{n:"Descente 10 → 1 silencieuse",f:"For time · cap 15 min",d:"c",eq:["rien"],v:1,
+ s:["Échauffement 5 min","Échelle descendante 10-9-8…-1 : pompes tempo + squats tempo, et 20 s de hollow hold tous les deux barreaux","110 répétitions de chaque au total, sans un saut","Note ton temps (repère : 9-13 min)"],
+ x:["pompetempo","squattempo","hollow"],tm:{m:'chrono'}},
+
+{n:"AMRAP valise",f:"AMRAP · 18 min",d:"m",eq:["rien"],v:1,
+ s:["Échauffement 6 min","AMRAP 18 min : 8 pompes tempo → 12 squats tempo → 16 fentes sur place → 10 ponts fessiers une jambe (5/côté) → 20 s de planche","Rythme continu mais silencieux : le tempo fait le travail que l'impact ferait ailleurs","Score = nombre de tours (repère : 6-9)"],
+ x:["pompetempo","squattempo","fentesur","ponte","gainage"],tm:{m:'amrap',t:1080}},
+
+{n:"Grand circuit sans bruit",f:"40/20 × 24 · 24 min",d:"m",eq:["rien"],v:1,
+ s:["Échauffement 8 min","24 stations de 40 s / 20 s en boucle de 6 : squats tempo → pompes (variante archer si trop facile) → fentes sur place → grimpeurs au sol lents → chaise au mur → hollow rocks","4 tours du circuit complet — les grimpeurs se font pieds glissés sur serviette pour rester silencieux","La vraie séance complète de déplacement : jambes, poussée, tronc, sans réveiller l'étage"],
+ x:["squattempo","pompe","pompearch","fentesur","mount","chaise","hollowr"],tm:{m:'interval',w:40,r:20,n:24}},
+
+/* ── Benchmarks & WOD ─────────────────────────────────────── */
+{n:"Cindy",t:"bench",f:"AMRAP · 20 min",d:"m",eq:["barre","rien"],
+ s:["Échauffement 8-10 min","AMRAP 20 min : 5 tractions → 10 pompes → 15 squats","Le repère de référence : 12-15 tours. Garde les tractions strictes le plus longtemps possible","Score = nombre de tours"],
+ x:["tract","pompe","squat"],tm:{m:'amrap',t:1200}},
+
+{n:"Baseline",t:"bench",f:"Chipper court · for time",d:"c",eq:["rien","course"],
+ s:["Échauffement 8 min","400 m course → 40 squats → 30 sit-ups → 20 pompes → 10 tractions","Le test d'entrée classique — à refaire tous les 2-3 mois pour mesurer","Note ton temps (repère : 5-8 min)"],
+ x:["course","squat","situp","pompe","tract"],tm:{m:'chrono'}},
+
+{n:"Annie",t:"bench",f:"50-40-30-20-10 · for time",d:"c",eq:["rien"],
+ s:["Échauffement 8 min + corde progressive","50-40-30-20-10 : double-unders (ou 2 × sauts simples) puis sit-ups à chaque palier","Note ton temps (repère : 8-12 min)","Retour au calme 5 min"],
+ x:["corde","situp"],tm:{m:'chrono'}},
+
+{n:"Death by burpees",t:"bench",f:"EMOM échelle · 20 min max",d:"c",eq:["rien"],
+ s:["Échauffement 8 min","Minute 1 : 1 burpee · minute 2 : 2 burpees · minute 3 : 3… tant que tu finis dans la minute","Ça paraît facile jusqu'à la minute 12","Score = dernière minute complétée (repère : 14-18)"],
+ x:["burpee"],tm:{m:'emom',e:60,n:20}},
+
+{n:"Griff",t:"bench",f:"Hero WOD · courses",d:"c",eq:["course"],
+ s:["Échauffement 10 min","2 tours : 800 m course avant → 400 m course en ARRIÈRE","Terrain parfaitement dégagé obligatoire","Note ton temps (repère : 11-16 min)"],
+ x:["course","arriere"],tm:{m:'chrono'}},
+
+{n:"Helen",t:"bench",f:"3 tours · for time",d:"m",eq:["course","lest","barre"],
+ s:["Échauffement 10 min avec accélérations","3 tours : 400 m course → 21 swings (16-24 kg) → 12 tractions","Note ton temps (repère : 10-14 min)","Retour au calme 5 min trot"],
+ x:["course","kbswing","tract"],tm:{m:'chrono'}},
+
+{n:"Karen",t:"bench",f:"150 reps · for time",d:"m",eq:["lest"],
+ s:["Échauffement 8 min + squats progressifs","150 lancers-squat (squat complet, lancer vertical ou contre un mur)","Fractionne : 15 × 10 ou 10 × 15 — les jambes vont chauffer","Note ton temps (repère : 8-14 min)"],
+ x:["wallball"],tm:{m:'chrono'}},
+
+{n:"Michael",t:"bench",f:"Hero WOD · 3 tours",d:"m",eq:["course","rien"],
+ s:["Échauffement 10 min","3 tours : 800 m course → 50 supermans → 50 sit-ups","Chaîne postérieure et tronc entre les courses","Note ton temps (repère : 22-30 min)"],
+ x:["course","superman","situp"],tm:{m:'chrono'}},
+
+{n:"The Chief",t:"bench",f:"5 × AMRAP 3 min",d:"m",eq:["lest","rien"],
+ s:["Échauffement 10 min","5 cycles : AMRAP 3 min de (3 cleans KB 2×16 kg → 6 pompes → 9 squats), 1 min de repos entre cycles","Reprends chaque cycle où tu t'es arrêté","Score = total de tours (repère : 17-25)"],
+ x:["clean","pompe","squat"],tm:{m:'interval',w:180,r:60,n:5}},
+
+{n:"Fight Gone Bad",t:"bench",f:"3 tours · 5 stations · 17 min",d:"m",eq:["lest","deniv"],
+ s:["Échauffement 10 min","Chaque minute une station : lancers-squat → sumo high pull (16 kg) → sauts sur box → push press (2×12 kg) → burpees","Minutes 6 et 12 : repos complet. Le minuteur bipe à chaque changement","Score = total de répétitions (repère : 200-300)"],
+ x:["wallball","sumohp","sautbox","pushpress","burpee"],tm:{m:'emom',e:60,n:17}},
+
+{n:"Brenton",t:"bench",f:"Hero WOD · déplacements",d:"m",eq:["rien"],
+ s:["Échauffement 10 min, poignets soignés","5 tours : 30 m de marche de l'ours → 30 m de sauts en longueur enchaînés","Gilet lesté pour la version fidèle · 1 burpee à chaque pause","Note ton temps (repère : 12-20 min)"],
+ x:["bear","saut","gilet","burpee"],tm:{m:'chrono'}},
+
+{n:"Half Murph",t:"bench",f:"Hero WOD · for time",d:"m",eq:["barre","course","rien"],
+ s:["Échauffement 10 min","800 m course → 50 tractions + 100 pompes + 150 squats (partitionne : 10 tours de 5/10/15) → 800 m course","Gilet lesté optionnel pour la version fidèle","Note ton temps (repère : 22-30 min)"],
+ x:["course","tract","pompe","squat","gilet"],tm:{m:'chrono'}},
+
+{n:"Loredo",t:"bench",f:"Hero WOD · 6 tours",d:"m",eq:["rien","course"],
+ s:["Échauffement 10 min","6 tours : 24 squats → 24 pompes → 24 fentes marchées → 400 m course","100 % poids du corps — parfait en déplacement","Note ton temps (repère : 28-38 min)"],
+ x:["squat","pompe","fente","course"],tm:{m:'chrono'}},
+
+{n:"Kelly",t:"bench",f:"5 tours · for time",d:"m",eq:["course","deniv","lest"],
+ s:["Échauffement 10 min","5 tours : 400 m course → 30 sauts sur box → 30 lancers-squat","Long et cardio — allure régulière dès le tour 1","Note ton temps (repère : 25-35 min)"],
+ x:["course","sautbox","wallball"],tm:{m:'chrono'}},
+
+{n:"Helton",t:"bench",f:"Hero WOD · 3 tours",d:"l",eq:["course","lest"],
+ s:["Échauffement 10 min","3 tours : 800 m course → 30 squat cleans KB (2×12-16 kg) → 30 burpees","Course, force, cardio : le triptyque complet","Note ton temps (repère : 28-38 min)"],
+ x:["course","clean","burpee"],tm:{m:'chrono'}},
+
+{n:"Manion",t:"bench",f:"Hero WOD · 7 tours",d:"l",eq:["course","lest"],
+ s:["Échauffement 10 min","7 tours : 400 m course → 29 goblet squats (20-24 kg)","203 squats au total — les jambes s'en souviendront","Note ton temps (repère : 30-42 min)"],
+ x:["course","goblet"],tm:{m:'chrono'}},
+
+{n:"Collin",t:"bench",f:"Hero WOD · 6 tours",d:"l",eq:["lest","deniv"],
+ s:["Échauffement 10 min","6 tours : 200 m de port de charge (2×16-20 kg) → 12 push press → 12 sauts sur box → 12 sit-ups","Le portage use le grip pour tout le reste — anticipe","Note ton temps (repère : 30-40 min)"],
+ x:["farmer","pushpress","sautbox","situp"],tm:{m:'chrono'}},
+
+{n:"Eva",t:"bench",f:"5 tours · long et dur",d:"l",eq:["course","lest","barre"],
+ s:["Échauffement 12 min complet","5 tours : 800 m course → 30 swings (24 kg) → 30 tractions","Un des benchmarks les plus longs — gère dès le premier tour","Note ton temps (repère : 35-50 min)"],
+ x:["course","kbswing","tract","tractneg"],tm:{m:'chrono'}},
+
+{n:"Riley",t:"bench",f:"Hero WOD · course + burpees",d:"l",eq:["course","rien"],
+ s:["Échauffement 10 min","2,4 km course → 150 burpees → 2,4 km course","Gilet lesté pour la version fidèle — sinon déjà très costaud","Note ton temps (repère : 45-65 min)"],
+ x:["course","burpee","gilet"],tm:{m:'chrono'}},
+
+{n:"Murph",t:"bench",f:"Hero WOD · le classique",d:"l",eq:["barre","course","rien"],
+ s:["Échauffement 12 min","1,6 km course → 100 tractions + 200 pompes + 300 squats (partitionne : 20 tours de 5/10/15) → 1,6 km course","Gilet lesté pour la version fidèle — sinon poids du corps, c'est déjà sérieux","Note ton temps (repère : 45-70 min)"],
+ x:["course","tract","pompe","squat","gilet"],tm:{m:'chrono'}},
+
+{n:"Chad 500",t:"bench",f:"Division allégée · 500 montées",d:"l",eq:["deniv","lest"],
+ s:["Échauffement 10 min hanches et mollets","500 montées de box (50 cm) — division officielle allégée de CHAD1000X : sans lest, ou sac 9-14 kg","Fractionne par 50, cadence régulière 15-17/min","Note ton temps (repère : 30-45 min)"],
+ x:["stepup","stepsac","gilet"],tm:{m:'chrono'}},
+
+{n:"Chad",t:"bench",f:"Hero WOD · 1000 montées",d:"l",eq:["deniv","lest"],
+ s:["Échauffement 10 min hanches et mollets","1000 montées de box (50 cm) avec gilet lesté","C'est une ascension : rythme régulier, fractionne par 50 ou 100","Note ton temps (repère : 60-90 min) — prévois la journée légère derrière"],
+ x:["stepup","stepsac","gilet"],tm:{m:'chrono'}},
+
+{n:"Benchmark ME — 1000 montées sac 11 kg",t:"bench",f:"Test montagne · continu",d:"l",eq:["deniv","lest"],
+ s:["Échauffement 10 min","1000 montées de box en CONTINU avec sac ~11 kg — le standard d'entrée des plans alpins avancés","Sans pause assise : ralentis au besoin, mais ne t'arrête pas","Note ton temps — la référence à viser en fin de bloc ME"],
+ x:["stepsac","escal"],tm:{m:'chrono'}}
+];
+
+/* ── Filtres & rendu ──────────────────────────────────────── */
+let fEq=null,fDur=null,fType=null,fCtx=null;
+function chips(el,map,get,set){el.innerHTML='';
+ const all=document.createElement('button');all.className='chip';all.textContent='Tout';
+ all.onclick=()=>{set(null);render()};el.appendChild(all);
+ Object.keys(map).forEach(k=>{const b=document.createElement('button');b.className='chip';b.textContent=map[k];
+  b.onclick=()=>{set(get()===k?null:k);render()};el.appendChild(b)})}
+function paintChips(){[['#fType',TYPE,()=>fType],['#fCtx',CTX,()=>fCtx],['#fEq',EQ,()=>fEq],['#fDur',DUR,()=>fDur]].forEach(([sel,map,get])=>{
+ const bs=document.querySelectorAll(sel+' .chip');bs[0].classList.toggle('on',get()===null);
+ Object.keys(map).forEach((k,i)=>bs[i+1].classList.toggle('on',get()===k))})}
+
+function fmt(tm){if(tm.m==='chrono')return'Chrono libre';
+ if(tm.m==='amrap')return'AMRAP '+(tm.t/60)+' min';
+ if(tm.m==='emom')return'EMOM '+tm.n+' × '+tm.e+' s';
+ return tm.n+' × '+tm.w+'/'+tm.r+' s'}
+
+function render(){paintChips();
+ const list=$('#list');list.innerHTML='';let shown=0;
+ [['bench','WOD & benchmarks'],['oppo','Séances opportunistes']].forEach(([tk,tlabel])=>{
+  if(fType&&fType!==tk)return;
+  const any=W.some(w=>(w.t||'oppo')===tk&&(!fDur||fDur===w.d)&&(!fEq||w.eq.includes(fEq))&&(!fCtx||w.v));
+  if(!any)return;
+  const ht=document.createElement('h2');ht.textContent=tlabel;ht.style.cssText='font-size:14px;color:var(--ink);margin-top:26px';list.appendChild(ht);
+  Object.keys(DUR).forEach(dk=>{
+   const items=W.filter(w=>(w.t||'oppo')===tk&&w.d===dk&&(!fDur||fDur===dk)&&(!fEq||w.eq.includes(fEq))&&(!fCtx||w.v));
+   if(!items.length)return;shown+=items.length;
+   const h=document.createElement('h2');h.textContent=DUR[dk];list.appendChild(h);
+   items.forEach(w=>{const i=W.indexOf(w);const c=document.createElement('div');c.className='card';
+   c.innerHTML='<div class="rname">'+w.n+'</div><div class="rmeta">'+w.f+'</div>'+
+   '<div class="tags">'+(w.t==='bench'?'<span class="tag bench">Benchmark</span>':'')+(w.v?'<span class="tag trip">Voyage</span>':'')+'<span class="tag dur">'+DUR[w.d]+'</span>'+w.eq.map(e=>'<span class="tag">'+EQ[e]+'</span>').join('')+'</div>'+
+   '<details><summary>Déroulé</summary><ol class="steps">'+w.s.map(s=>'<li>'+s+'</li>').join('')+'</ol></details>'+
+   '<details><summary>Exécution des mouvements</summary>'+w.x.map(k=>'<div class="ex"><b>'+EX[k][0]+'</b><p>'+EX[k][1]+'</p></div>').join('')+'</details>'+
+   '<button class="btn btn-ghost" style="margin-top:10px" data-i="'+i+'">'+fmt(w.tm)+'</button>';
+   c.querySelector('button').onclick=()=>open_(i);list.appendChild(c)})})});
+ if(!shown)list.innerHTML='<div class="card"><div class="rname">Rien avec ce filtre</div><p class="hint" style="margin-top:6px">Élargis le matériel ou la durée. Presque toutes les séances sans matériel tiennent dans 3 m².</p></div>'}
+
+/* ── Lecteur / minuteurs ──────────────────────────────────── */
+let S=null,tick=null,ac=null;
+function beep(f,d){try{ac=ac||new (window.AudioContext||window.webkitAudioContext)();
+ const o=ac.createOscillator(),g=ac.createGain();o.connect(g);g.connect(ac.destination);
+ o.frequency.value=f;g.gain.setValueAtTime(.001,ac.currentTime);
+ g.gain.exponentialRampToValueAtTime(.25,ac.currentTime+.01);
+ g.gain.exponentialRampToValueAtTime(.001,ac.currentTime+d);
+ o.start();o.stop(ac.currentTime+d+.02)}catch(e){}
+ if(navigator.vibrate)navigator.vibrate(d>.2?[120,60,120]:80)}
+
+function open_(i){openW(W[i])}
+function openW(w){
+ S={w:w,tm:w.tm,run:false,t0:null,acc:0,phase:'work',round:1,last:-1};
+ $('#pTitle').textContent=w.n;$('#pMain').textContent='Démarrer';
+ $('#pScore').style.display=w.tm.m==='chrono'?'none':'block';$('#pScore').value='';
+ draw();$('#player').classList.add('on')}
+
+function elapsed(){return S.acc+(S.t0?Date.now()-S.t0:0)}
+function mmss(s){s=Math.max(0,Math.ceil(s));return Math.floor(s/60)+':'+String(s%60).padStart(2,'0')}
+
+function draw(){if(!S)return;const tm=S.tm,e=elapsed()/1000;let left,frac,lab,sub='';
+ if(tm.m==='chrono'){left=e;frac=0;lab='Temps écoulé';$('#pDial').className='dial'}
+ else if(tm.m==='amrap'){left=tm.t-e;frac=Math.min(1,e/tm.t);lab='Il reste';$('#pDial').className='dial work';
+  if(left<=0)finish()}
+ else if(tm.m==='emom'){const r=Math.floor(e/tm.e)+1;left=tm.e-(e%tm.e);frac=1-left/tm.e;
+  lab='Minute '+Math.min(r,tm.n);sub='sur '+tm.n;$('#pDial').className='dial work';
+  if(r!==S.last&&S.run){S.last=r;if(r>1)beep(880,.15)}
+  if(e>=tm.e*tm.n)finish()}
+ else{const cyc=tm.w+tm.r,c=Math.floor(e/cyc),p=e%cyc,work=p<tm.w;
+  left=work?tm.w-p:cyc-p;frac=work?p/tm.w:(p-tm.w)/tm.r;
+  lab=work?'Effort':'Repos';sub='Round '+Math.min(c+1,tm.n)+' / '+tm.n;
+  $('#pDial').className='dial '+(work?'work':'rest');
+  const key=c*2+(work?0:1);
+  if(key!==S.last&&S.run){S.last=key;beep(work?1046:660,work?.22:.12)}
+  if(e>=cyc*tm.n)finish()}
+ $('#pCount').textContent=mmss(left);$('#pLabel').textContent=lab;$('#pSub').textContent=sub;
+ $('#pArc').setAttribute('stroke-dashoffset',283*(tm.m==='chrono'?0:frac))}
+
+function finish(){if(!S||S.done)return;S.done=true;if(S.t0){S.acc+=Date.now()-S.t0;S.t0=null}
+ S.run=false;clearInterval(tick);beep(523,.5);$('#pMain').textContent='Terminé';$('#pLabel').textContent='Terminé'}
+
+function save(){if(!S)return;if(S.t0){S.acc+=Date.now()-S.t0;S.t0=null}clearInterval(tick);
+ const s=Math.floor(S.acc/1000),sc=$('#pScore').value.trim(),h=store.g('hist',[]);
+ h.unshift({n:S.w.n,d:new Date().toISOString().slice(0,10),t:mmss(s),s:sc});
+ store.s('hist',h.slice(0,40));close_();renderHist()}
+function close_(){clearInterval(tick);S=null;$('#player').classList.remove('on')}
+
+function renderProgs(){const box=$('#progs');box.innerHTML='';
+ PROG.forEach(p=>{
+  const lvl=Math.min(Math.max(store.g('lvl:'+p.id,1),1),p.lv.length);
+  const L=p.lv[lvl-1],c=document.createElement('div');c.className='card';c.id='prog-'+p.id;
+  c.innerHTML='<div class="rname">'+p.n+'</div><div class="rmeta">Objectif : '+p.obj+'</div>'+
+  '<p style="font-size:12.5px;color:var(--muted);margin-top:6px">'+p.intro+'</p>'+
+  '<div class="tags" style="margin-top:10px">'+p.lv.map((x,i)=>'<span class="tag" style="'+(i+1===lvl?'background:var(--ink);color:#F7F5F1;border-color:var(--ink)':(i+1<lvl?'color:var(--cool);border-color:rgba(47,93,87,.35)':''))+'">'+(i+1<lvl?'✓ ':'')+'N'+(i+1)+'</span>').join('')+'</div>'+
+  '<div style="border-top:1px solid var(--line);margin-top:10px;padding-top:10px">'+
+  '<div style="font-weight:800;font-size:13.5px">Niveau '+lvl+' / '+p.lv.length+' — '+L.t+'</div>'+
+  '<div class="rmeta" style="margin-top:3px">Séance '+L.s.f+' · 2×/semaine · Passage : '+L.crit+'</div>'+
+  '<details><summary>Déroulé</summary><ol class="steps">'+L.s.d.map(s=>'<li>'+s+'</li>').join('')+'</ol></details>'+
+  '<details><summary>Exécution des mouvements</summary>'+L.s.x.map(k=>'<div class="ex"><b>'+EX[k][0]+'</b><p>'+EX[k][1]+'</p></div>').join('')+'</details>'+
+  '<button class="btn btn-ghost" style="margin-top:10px" data-a="go">Lancer la séance — '+L.s.f+'</button>'+
+  '<div style="display:flex;gap:8px;margin-top:8px">'+
+  (lvl>1?'<button class="btn btn-ghost" style="flex:1;padding:10px;font-size:13px" data-a="down">← Niveau '+(lvl-1)+'</button>':'')+
+  (lvl<p.lv.length?'<button class="btn btn-ghost" style="flex:1;padding:10px;font-size:13px" data-a="up">Critère validé → N'+(lvl+1)+'</button>':'<div style="flex:1;text-align:center;font-size:12.5px;color:var(--cool);font-weight:800;padding:10px">Dernier niveau — objectif en vue</div>')+
+  '</div></div>'+
+  '<p style="font-size:12px;color:var(--muted);margin-top:8px">'+p.note+'</p>';
+  c.querySelector('[data-a=go]').onclick=()=>openW(L.s);
+  const up=c.querySelector('[data-a=up]');if(up)up.onclick=()=>{store.s('lvl:'+p.id,lvl+1);renderProgs()};
+  const dn=c.querySelector('[data-a=down]');if(dn)dn.onclick=()=>{store.s('lvl:'+p.id,lvl-1);renderProgs()};
+  box.appendChild(c)});
+ const pc=document.querySelectorAll('#fProg .chip');
+ PROG.forEach((p,i)=>{if(pc[i])pc[i].textContent=p.n+' · N'+Math.min(Math.max(store.g('lvl:'+p.id,1),1),p.lv.length)})}
+
+function renderHist(){const h=store.g('hist',[]);
+ $('#hist').innerHTML=h.length?h.slice(0,15).map(x=>'<div class="hist">'+x.d+' · '+x.n+' — '+x.t+(x.s?' · '+x.s:'')+'</div>').join('')
+ :'<p class="hint">Rien de noté pour l\'instant. Termine une séance avec « Terminer &amp; noter ».</p>'}
+
+document.addEventListener('DOMContentLoaded',()=>{
+ PROG.forEach(p=>{const b=document.createElement('button');b.className='chip';
+  const lv=Math.min(Math.max(store.g('lvl:'+p.id,1),1),p.lv.length);
+  b.textContent=p.n+' · N'+lv;
+  b.onclick=()=>{const el=document.getElementById('prog-'+p.id);if(!el)return;
+   el.scrollIntoView({behavior:'smooth',block:'start'});
+   el.querySelector('details').open=true;
+   el.style.transition='box-shadow .3s';el.style.boxShadow='0 0 0 2.5px var(--amber)';
+   setTimeout(()=>{el.style.boxShadow=''},1600)};
+  $('#fProg').appendChild(b)});
+ chips($('#fType'),TYPE,()=>fType,v=>fType=v);chips($('#fCtx'),CTX,()=>fCtx,v=>fCtx=v);chips($('#fEq'),EQ,()=>fEq,v=>fEq=v);chips($('#fDur'),DUR,()=>fDur,v=>fDur=v);
+ render();renderProgs();renderHist();
+ $('#pMain').onclick=()=>{if(!S||S.done)return;
+  if(S.run){S.acc+=Date.now()-S.t0;S.t0=null;S.run=false;clearInterval(tick);$('#pMain').textContent='Reprendre'}
+  else{S.t0=Date.now();S.run=true;tick=setInterval(draw,200);$('#pMain').textContent='Pause';beep(784,.15)}};
+ $('#pSave').onclick=save;$('#pQuit').onclick=close_;
+ document.addEventListener('keydown',e=>{if(!S)return;
+  if(e.code==='Space'){e.preventDefault();$('#pMain').click()}if(e.key==='Escape')close_()})});
+
+/* ── PWA ──────────────────────────────────────────────────── */
+if('serviceWorker' in navigator){
+ window.addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}))}
+/* Garder l'écran allumé pendant une séance (Wake Lock, si dispo) */
+let wl=null;
+async function wake(on){try{
+ if(on&&'wakeLock' in navigator){wl=await navigator.wakeLock.request('screen')}
+ else if(wl){await wl.release();wl=null}}catch(e){}}
+document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'&&S&&S.run)wake(true)});
+const _openW=openW;openW=function(w){_openW(w);wake(true)};
+const _close=close_;close_=function(){wake(false);_close()};
+</script></body></html>
