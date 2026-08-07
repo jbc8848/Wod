@@ -1,5 +1,5 @@
 /* Opportuniste — service worker. Incrémente CACHE à chaque mise à jour de l'app. */
-const CACHE = 'oppo-v3';
+const CACHE = 'oppo-v4';
 const ASSETS = [
   './',
   './index.html',

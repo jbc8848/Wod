@@ -95,6 +95,17 @@ details[open]>summary::before{content:'▾ '}
 
 <div id="list"></div>
 
+<h2 style="font-size:14px;color:var(--ink);margin-top:26px">Roulette</h2>
+<div class="card" id="roul">
+<div class="rname">Séance tirée au sort</div>
+<div class="rmeta">6-8 exercices · 4-5 séries · 8-12 reps (isométries en secondes)</div>
+<p style="font-size:12.5px;color:var(--muted);margin-top:6px">Coche ton matériel du moment, tire, relance jusqu'à ce que ça te plaise. Le tirage garantit au moins un exercice de tirage, un de poussée, un de jambes et un de tronc quand le matériel le permet. Repos indicatif : 60-90 s entre séries.</p>
+<div class="flabel" style="margin-top:10px">Matériel du jour</div>
+<div class="frow" id="rEq"></div>
+<button class="btn btn-primary" id="rGo" style="margin-top:10px">Tirer une séance</button>
+<div id="rOut"></div>
+</div>
+
 <h2 style="font-size:14px;color:var(--ink);margin-top:26px">Programmes évolutifs</h2>
 <div id="progs"></div>
 
@@ -557,7 +568,7 @@ document.addEventListener('DOMContentLoaded',()=>{
    setTimeout(()=>{el.style.boxShadow=''},1600)};
   $('#fProg').appendChild(b)});
  chips($('#fType'),TYPE,()=>fType,v=>fType=v);chips($('#fCtx'),CTX,()=>fCtx,v=>fCtx=v);chips($('#fEq'),EQ,()=>fEq,v=>fEq=v);chips($('#fDur'),DUR,()=>fDur,v=>fDur=v);
- render();renderProgs();renderHist();
+ render();renderProgs();renderHist();initRoul();
  $('#pMain').onclick=()=>{if(!S||S.done)return;
   if(S.run){S.acc+=Date.now()-S.t0;S.t0=null;S.run=false;clearInterval(tick);$('#pMain').textContent='Reprendre'}
   else{S.t0=Date.now();S.run=true;tick=setInterval(draw,200);$('#pMain').textContent='Pause';beep(784,.15)}};
@@ -566,6 +577,79 @@ document.addEventListener('DOMContentLoaded',()=>{
   if(e.code==='Space'){e.preventDefault();$('#pMain').click()}if(e.key==='Escape')close_()})});
 
 /* ── PWA ──────────────────────────────────────────────────── */
+/* ── Roulette ─────────────────────────────────────────────── */
+/* cat: tirage/poussee/jambes/tronc · u: reps | sec | side (par côté) · r: bornes propres si 8-12 ne convient pas */
+const POOL=[
+ {k:'tract',c:'tirage',eq:['barre'],u:'reps',r:[5,10]},
+ {k:'tractneg',c:'tirage',eq:['barre'],u:'reps',r:[3,6]},
+ {k:'scap',c:'tirage',eq:['barre'],u:'reps'},
+ {k:'row',c:'tirage',eq:['barre'],u:'reps'},
+ {k:'archpull',c:'tirage',eq:['barre'],u:'side',r:[4,8]},
+ {k:'pompe',c:'poussee',eq:['rien'],u:'reps'},
+ {k:'pompetempo',c:'poussee',eq:['rien'],u:'reps',r:[6,10]},
+ {k:'pompepiq',c:'poussee',eq:['rien'],u:'reps'},
+ {k:'pompearch',c:'poussee',eq:['rien'],u:'side',r:[4,8]},
+ {k:'dips',c:'poussee',eq:['rien','deniv'],u:'reps'},
+ {k:'pushpress',c:'poussee',eq:['lest'],u:'reps'},
+ {k:'pikeel',c:'poussee',eq:['deniv'],u:'reps',r:[5,10]},
+ {k:'squat',c:'jambes',eq:['rien'],u:'reps',r:[12,20]},
+ {k:'squattempo',c:'jambes',eq:['rien'],u:'reps'},
+ {k:'goblet',c:'jambes',eq:['lest'],u:'reps'},
+ {k:'fente',c:'jambes',eq:['rien'],u:'side'},
+ {k:'bulg',c:'jambes',eq:['deniv'],u:'side',r:[6,10]},
+ {k:'stepup',c:'jambes',eq:['deniv'],u:'side'},
+ {k:'stepsac',c:'jambes',eq:['lest','deniv'],u:'side'},
+ {k:'kbswing',c:'jambes',eq:['lest'],u:'reps',r:[10,15]},
+ {k:'pistol',c:'jambes',eq:['deniv'],u:'side',r:[3,6]},
+ {k:'ponte',c:'jambes',eq:['rien'],u:'side'},
+ {k:'sautbox',c:'jambes',eq:['deniv'],u:'reps',r:[6,10]},
+ {k:'hollow',c:'tronc',eq:['rien'],u:'sec'},
+ {k:'hollowr',c:'tronc',eq:['rien'],u:'reps',r:[12,20]},
+ {k:'gainage',c:'tronc',eq:['rien'],u:'sec'},
+ {k:'gainlat',c:'tronc',eq:['rien'],u:'sec'},
+ {k:'lsit',c:'tronc',eq:['barre','rien'],u:'sec',r:[10,25]},
+ {k:'superman',c:'tronc',eq:['rien'],u:'reps'},
+ {k:'situp',c:'tronc',eq:['rien'],u:'reps',r:[12,20]},
+ {k:'mount',c:'tronc',eq:['rien'],u:'reps',r:[16,24]},
+ {k:'farmer',c:'tronc',eq:['lest'],u:'sec',r:[30,45]},
+ {k:'burpee',c:'jambes',eq:['rien'],u:'reps',r:[8,12]}
+];
+let rEqSel=new Set(['rien','barre','lest','deniv']),lastDraw=store.g('roul',null);
+const rnd=(a,b)=>a+Math.floor(Math.random()*(b-a+1));
+function drawSession(){
+ const avail=POOL.filter(p=>p.eq.some(e=>rEqSel.has(e)));
+ if(avail.length<6)return null;
+ const n=rnd(6,8),series=rnd(4,5),pick=[],used=new Set();
+ ['tirage','poussee','jambes','tronc'].forEach(c=>{
+  const cs=avail.filter(p=>p.c===c&&!used.has(p.k));
+  if(cs.length){const p=cs[rnd(0,cs.length-1)];pick.push(p);used.add(p.k)}});
+ const rest=avail.filter(p=>!used.has(p.k)).sort(()=>Math.random()-.5);
+ for(const p of rest){if(pick.length>=n)break;
+  if(pick.filter(x=>x.c===p.c).length>=3)continue;pick.push(p);used.add(p.k)}
+ return{series:series,items:pick.map(p=>{const b=p.r||(p.u==='sec'?[20,40]:[8,12]);
+  return{k:p.k,u:p.u,v:rnd(b[0],b[1])}})}}
+function fmtItem(it){return it.u==='sec'?it.v+' s':it.u==='side'?it.v+' / côté':it.v+' reps'}
+function renderRoul(){const out=$('#rOut');
+ if(!lastDraw){out.innerHTML='';return}
+ out.innerHTML='<div style="border-top:1px solid var(--line);margin-top:12px;padding-top:10px">'+
+ '<div style="font-weight:800;font-size:13.5px">'+lastDraw.items.length+' exercices · '+lastDraw.series+' séries</div>'+
+ lastDraw.items.map((it,i)=>'<div class="ex"><b>'+(i+1)+'. '+EX[it.k][0]+' — '+lastDraw.series+' × '+fmtItem(it)+'</b><p>'+EX[it.k][1]+'</p></div>').join('')+
+ '<button class="btn btn-ghost" style="margin-top:10px" id="rRe">Relancer</button>'+
+ '<button class="btn btn-ghost" style="margin-top:8px" id="rStart">Chrono libre</button></div>';
+ $('#rRe').onclick=()=>{lastDraw=drawSession();store.s('roul',lastDraw);renderRoul()};
+ $('#rStart').onclick=()=>openW({n:'Roulette · '+lastDraw.items.length+' exercices',
+  s:lastDraw.items.map((it,i)=>(i+1)+'. '+EX[it.k][0]+' — '+lastDraw.series+' × '+fmtItem(it)),
+  x:lastDraw.items.map(it=>it.k),tm:{m:'chrono'}})}
+function initRoul(){const row=$('#rEq');
+ Object.keys(EQ).filter(k=>k!=='course').forEach(k=>{
+  const b=document.createElement('button');b.className='chip'+(rEqSel.has(k)?' on':'');b.textContent=EQ[k];
+  b.onclick=()=>{rEqSel.has(k)?rEqSel.delete(k):rEqSel.add(k);b.classList.toggle('on')};
+  row.appendChild(b)});
+ $('#rGo').onclick=()=>{const d=drawSession();
+  if(!d){$('#rOut').innerHTML='<p class="hint" style="margin-top:10px">Pas assez d\'exercices avec cette sélection — coche au moins « Sans matériel ».</p>';return}
+  lastDraw=d;store.s('roul',d);renderRoul()};
+ renderRoul()}
+
 /* ── Installation ─────────────────────────────────────────── */
 (function(){
  const box=document.getElementById('inst'),txt=document.getElementById('instTxt'),btn=document.getElementById('instBtn');
