@@ -75,7 +75,7 @@ details[open]>summary::before{content:'▾ '}
 @media(prefers-reduced-motion:reduce){*{transition:none!important}}
 </style></head>
 <body><div class="wrap">
-<div class="kicker">OPPORTUNISTE · <span id="ver">v5 · 07.08.26</span></div>
+<div class="kicker">OPPORTUNISTE · <span id="ver">v6 · 07.08.26</span></div>
 <div id="inst" style="display:none;background:var(--ink);color:#F7F5F1;border-radius:var(--r);padding:14px;margin:10px 0">
  <div style="font-weight:800;font-size:14px">Installer l'application</div>
  <div id="instTxt" style="font-size:12.5px;color:rgba(247,245,241,.7);margin-top:4px"></div>
@@ -84,16 +84,6 @@ details[open]>summary::before{content:'▾ '}
 <h1>Séances opportunistes</h1>
 <div class="sub">Ce que tu peux faire là où tu es, avec ce que tu as. WOD et benchmarks nommés d'un côté, séances montées sur mesure de l'autre — orientation grimpeur-alpiniste : tirage, tronc, dénivelé, port de charge.</div>
 <div class="note"><b>48 séances</b> + 2 programmes évolutifs. Filtre par type, contexte, matériel et durée. Le contexte <b>Voyage</b> isole ce qui tient dans 2 m², sans matériel et sans bruit — chambre d'hôtel, refuge, aéroport. Le fractionné course et home-trainer reste dans <b>Conditionnement</b>.</div>
-
-<div class="filters">
-<div class="flabel">Programmes évolutifs</div><div class="frow" id="fProg"></div>
-<div class="flabel">Type</div><div class="frow" id="fType"></div>
-<div class="flabel">Contexte</div><div class="frow" id="fCtx"></div>
-<div class="flabel">Matériel</div><div class="frow" id="fEq"></div>
-<div class="flabel">Durée</div><div class="frow" id="fDur"></div>
-</div>
-
-<div id="list"></div>
 
 <h2 style="font-size:14px;color:var(--ink);margin-top:26px">Roulette</h2>
 <div class="card" id="roul">
@@ -105,6 +95,17 @@ details[open]>summary::before{content:'▾ '}
 <button class="btn btn-primary" id="rGo" style="margin-top:10px">Tirer une séance</button>
 <div id="rOut"></div>
 </div>
+
+
+<div class="filters">
+<div class="flabel">Programmes évolutifs</div><div class="frow" id="fProg"></div>
+<div class="flabel">Type</div><div class="frow" id="fType"></div>
+<div class="flabel">Contexte</div><div class="frow" id="fCtx"></div>
+<div class="flabel">Matériel</div><div class="frow" id="fEq"></div>
+<div class="flabel">Durée</div><div class="frow" id="fDur"></div>
+</div>
+
+<div id="list"></div>
 
 <h2 style="font-size:14px;color:var(--ink);margin-top:26px">Programmes évolutifs</h2>
 <div id="progs"></div>
