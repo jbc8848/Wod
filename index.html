@@ -75,7 +75,7 @@ details[open]>summary::before{content:'▾ '}
 @media(prefers-reduced-motion:reduce){*{transition:none!important}}
 </style></head>
 <body><div class="wrap">
-<div class="kicker">OPPORTUNISTE · <span id="ver">v6 · 07.08.26</span></div>
+<div class="kicker">OPPORTUNISTE · <span id="ver">v9 · 07.08.26</span></div>
 <div id="inst" style="display:none;background:var(--ink);color:#F7F5F1;border-radius:var(--r);padding:14px;margin:10px 0">
  <div style="font-weight:800;font-size:14px">Installer l'application</div>
  <div id="instTxt" style="font-size:12.5px;color:rgba(247,245,241,.7);margin-top:4px"></div>
@@ -88,7 +88,7 @@ details[open]>summary::before{content:'▾ '}
 <h2 style="font-size:14px;color:var(--ink);margin-top:26px">Roulette</h2>
 <div class="card" id="roul">
 <div class="rname">Séance tirée au sort</div>
-<div class="rmeta">6-8 exercices · 4-5 séries · 8-12 reps (isométries en secondes)</div>
+<div class="rmeta">Hypertrophie 6-8 × 4-5 × 8-12 · Force 5-6 × 3-4 × 4-6 · Force-endurance 5-7 × 3-4 × 15-25</div>
 <p style="font-size:12.5px;color:var(--muted);margin-top:6px">Coche ton matériel du moment, tire, relance jusqu'à ce que ça te plaise. Le tirage garantit au moins un exercice de tirage, un de poussée, un de jambes et un de tronc quand le matériel le permet. Repos indicatif : 60-90 s entre séries.</p>
 <div class="flabel" style="margin-top:10px">Matériel du jour</div>
 <div class="frow" id="rEq"></div>
@@ -106,6 +106,10 @@ details[open]>summary::before{content:'▾ '}
 </div>
 
 <div id="list"></div>
+
+<h2 style="font-size:14px;color:var(--ink);margin-top:26px">Split hypertrophie</h2>
+<div class="note"><b>4 séances, chaque muscle 2× par semaine.</b> Placement type : Haut A lundi · Bas A mardi · Haut B jeudi · Bas B vendredi, escalade les autres jours. Ne mets jamais Haut B (tirage lourd) la veille d'une séance de doigts. Progression : double progression — quand tu tiens le haut de la fourchette sur TOUTES les séries, ajoute 1 à 2 kg la fois suivante. Volume hebdomadaire : 14 à 17 séries par groupe musculaire, dans la fourchette qui fait consensus.</div>
+<div id="split"></div>
 
 <h2 style="font-size:14px;color:var(--ink);margin-top:26px">Programmes évolutifs</h2>
 <div id="progs"></div>
@@ -195,7 +199,27 @@ chaise:["Chaise au mur","Dos plaqué au mur, cuisses à l'horizontale, mains sur
 squattempo:["Squat tempo 3-1-1","Descente en 3 s, pause 1 s en bas, remontée en 1 s. Le tempo remplace la charge : au même nombre de répétitions, l'effort double, et sans un bruit."],
 pompetempo:["Pompe tempo 3-1-1","Descente en 3 s, pause poitrine à un poing du sol, remontée. La version silencieuse et rentable quand les répétitions rapides deviennent trop faciles."],
 fentesur:["Fente sur place","Fente alternée sans déplacement : un pas fixe, descente verticale du genou arrière. Zéro impact, zéro bruit, faisable entre un lit et un mur."],
-ponte:["Pont fessier une jambe","Allongé, un pied au sol, l'autre jambe tendue : monte le bassin en poussant sur le talon. Chaîne postérieure sans aucun matériel ni bruit."]
+ponte:["Pont fessier une jambe","Allongé, un pied au sol, l'autre jambe tendue : monte le bassin en poussant sur le talon. Chaîne postérieure sans aucun matériel ni bruit."],
+hinge:["Charnière de hanche lestée","Sac ou KB tenu bras tendus : recule les hanches en gardant le dos plat et les genoux à peine fléchis, la charge frôle les cuisses jusqu'à mi-tibia, puis reviens en poussant le bassin vers l'avant. Tu dois SENTIR les ischios s'étirer — si tu sens les lombaires, tu plies le dos."],
+rdl1:["Soulevé une jambe","En appui sur une jambe, bascule le buste vers l'avant pendant que la jambe libre part en arrière, corps en T. Hanches à niveau, pas de rotation. Le meilleur exercice ischios sans matériel, et un correcteur d'asymétrie redoutable."],
+curlgliss:["Leg curl glissé","Allongé, talons sur une serviette (parquet) ou deux chaussettes : bassin décollé, tends les jambes en glissant puis ramène les talons aux fesses en résistant. Le bassin ne retombe jamais."],
+nordic:["Nordic curl","Genoux au sol, chevilles bloquées (sous un lit, un meuble lourd) : descends le buste vers l'avant en résistant le plus longtemps possible, rattrape aux mains, repousse. L'exercice ischios le plus dur qui existe — 3 à 6 reps suffisent."],
+hipthrust:["Hip thrust lesté","Haut du dos sur un banc ou un lit, charge sur les hanches : monte le bassin jusqu'à l'alignement genoux-hanches-épaules, menton rentré, 1 s de contraction en haut. Le fessier en position raccourcie."],
+calf:["Mollets une jambe","Avant-pied sur une marche, talon dans le vide : descends lentement en étirement complet, monte sur la pointe, 1 s en haut. Genou tendu. Directement rentable en montée d'approche et sur les pointes de crampons."],
+squatlest:["Squat lesté","Sac serré haut sur le dos ou charge en goblet. Même exigence de profondeur qu'à vide — si l'amplitude se réduit, la charge est trop lourde."],
+pompedecl:["Pompe déclinée","Pieds surélevés sur une chaise ou un lit : plus les pieds montent, plus la charge passe sur le haut des pectoraux et les épaules."],
+pompelest:["Pompe lestée","Sac à dos chargé posé haut entre les omoplates. La façon la plus simple de rester dans une fourchette basse de reps quand les pompes deviennent faciles."],
+diamant:["Pompe diamant","Mains jointes sous la poitrine, index et pouces en triangle, coudes serrés le long du corps. Le triceps prend l'essentiel du travail."],
+lateral:["Élévation latérale","Charge légère, bras montés sur les côtés jusqu'à l'horizontale, coudes très légèrement fléchis, sans élan. Deltoïde moyen — celui que ni le tirage ni la pompe ne touchent."],
+rearfly:["Oiseau buste penché","Buste incliné vers l'avant, bras qui s'ouvrent sur les côtés en serrant les omoplates, pouces vers le haut. Deltoïde postérieur : l'antagoniste direct de la position enroulée du grimpeur."],
+tractsup:["Traction supination","Paumes vers toi, mains largeur d'épaules : le biceps contribue bien plus qu'en pronation. Menton au-dessus de la barre, descente contrôlée."],
+curl:["Curl biceps","Coudes fixes le long du corps, remontée sans balancer le buste, descente en 2 s. Le biceps travaille déjà en tirage, mais jamais en position raccourcie complète."],
+exttri:["Extension triceps nuque","Charge tenue à deux mains derrière la tête, coudes hauts et fixes : tends les bras vers le plafond. Le triceps en position étirée, ce que la pompe ne donne pas."],
+legraise:["Relevé de jambes suspendu","Suspendu bras tendus, monte les jambes tendues (ou genoux repliés) vers la barre sans balancer. Enroule le bassin en fin de mouvement — sinon ce ne sont que des fléchisseurs de hanche."],
+dragon:["Dragon flag groupé","Épaules et haut du dos au sol, mains agrippées derrière la tête : corps décollé en bloc, descente lente en gardant le bassin verrouillé. Genoux repliés d'abord, jambes tendues ensuite."],
+wrist:["Flexion-extension poignets","Avant-bras posés sur les cuisses, charge légère : monte et descends par le poignet seul, amplitude complète, série longue. Fais les DEUX sens — l'extension est l'antagoniste de tes fléchisseurs de doigts."],
+revcurl:["Curl prise pronation","Paumes vers le bas, montée lente : cible le brachio-radial et les extenseurs de l'avant-bras. Charge nettement plus légère qu'en supination, c'est normal."],
+deadhang:["Suspension bras tendus","Simplement suspendu à la barre, épaules actives (pas avachi dans les articulations), respiration calme. Grip, décompression de l'épaule et santé du coude en un seul exercice."]
 };
 
 /* ── Séances ──────────────────────────────────────────────── */
@@ -569,7 +593,7 @@ document.addEventListener('DOMContentLoaded',()=>{
    setTimeout(()=>{el.style.boxShadow=''},1600)};
   $('#fProg').appendChild(b)});
  chips($('#fType'),TYPE,()=>fType,v=>fType=v);chips($('#fCtx'),CTX,()=>fCtx,v=>fCtx=v);chips($('#fEq'),EQ,()=>fEq,v=>fEq=v);chips($('#fDur'),DUR,()=>fDur,v=>fDur=v);
- render();renderProgs();renderHist();initRoul();
+ render();renderProgs();renderSplit();renderHist();initRoul();
  $('#pMain').onclick=()=>{if(!S||S.done)return;
   if(S.run){S.acc+=Date.now()-S.t0;S.t0=null;S.run=false;clearInterval(tick);$('#pMain').textContent='Reprendre'}
   else{S.t0=Date.now();S.run=true;tick=setInterval(draw,200);$('#pMain').textContent='Pause';beep(784,.15)}};
@@ -583,37 +607,58 @@ document.addEventListener('DOMContentLoaded',()=>{
 const POOL=[
  {k:'tract',c:'tirage',eq:['barre'],u:'reps',r:[5,10]},
  {k:'tractneg',c:'tirage',eq:['barre'],u:'reps',r:[3,6]},
- {k:'scap',c:'tirage',eq:['barre'],u:'reps'},
+ {k:'scap',c:'tirage',eq:['barre'],u:'reps',nf:1},
  {k:'row',c:'tirage',eq:['barre'],u:'reps'},
  {k:'archpull',c:'tirage',eq:['barre'],u:'side',r:[4,8]},
+ {k:'rearfly',c:'tirage',eq:['lest'],u:'reps',r:[10,15],nf:1},
  {k:'pompe',c:'poussee',eq:['rien'],u:'reps'},
  {k:'pompetempo',c:'poussee',eq:['rien'],u:'reps',r:[6,10]},
  {k:'pompepiq',c:'poussee',eq:['rien'],u:'reps'},
  {k:'pompearch',c:'poussee',eq:['rien'],u:'side',r:[4,8]},
- {k:'dips',c:'poussee',eq:['rien','deniv'],u:'reps'},
+ {k:'pompedecl',c:'poussee',eq:['deniv'],u:'reps'},
+ {k:'pompelest',c:'poussee',eq:['lest'],u:'reps'},
  {k:'pushpress',c:'poussee',eq:['lest'],u:'reps'},
  {k:'pikeel',c:'poussee',eq:['deniv'],u:'reps',r:[5,10]},
- {k:'squat',c:'jambes',eq:['rien'],u:'reps',r:[12,20]},
+ {k:'lateral',c:'poussee',eq:['lest'],u:'reps',r:[10,15],nf:1},
+ {k:'squat',c:'jambes',eq:['rien'],u:'reps',r:[12,20],nf:1},
  {k:'squattempo',c:'jambes',eq:['rien'],u:'reps'},
+ {k:'squatlest',c:'jambes',eq:['lest'],u:'reps'},
  {k:'goblet',c:'jambes',eq:['lest'],u:'reps'},
  {k:'fente',c:'jambes',eq:['rien'],u:'side'},
  {k:'bulg',c:'jambes',eq:['deniv'],u:'side',r:[6,10]},
  {k:'stepup',c:'jambes',eq:['deniv'],u:'side'},
  {k:'stepsac',c:'jambes',eq:['lest','deniv'],u:'side'},
- {k:'kbswing',c:'jambes',eq:['lest'],u:'reps',r:[10,15]},
  {k:'pistol',c:'jambes',eq:['deniv'],u:'side',r:[3,6]},
- {k:'ponte',c:'jambes',eq:['rien'],u:'side'},
- {k:'sautbox',c:'jambes',eq:['deniv'],u:'reps',r:[6,10]},
+ {k:'sautbox',c:'jambes',eq:['deniv'],u:'reps',r:[6,10],nf:1},
+ {k:'calf',c:'jambes',eq:['deniv'],u:'side',r:[12,20],nf:1},
+ {k:'burpee',c:'jambes',eq:['rien'],u:'reps',r:[8,12],nf:1},
+ {k:'ponte',c:'post',eq:['rien'],u:'side'},
+ {k:'rdl1',c:'post',eq:['rien'],u:'side'},
+ {k:'hinge',c:'post',eq:['lest'],u:'reps'},
+ {k:'hipthrust',c:'post',eq:['lest','deniv'],u:'reps'},
+ {k:'curlgliss',c:'post',eq:['rien'],u:'reps',r:[6,12]},
+ {k:'nordic',c:'post',eq:['rien'],u:'reps',r:[3,6]},
+ {k:'kbswing',c:'post',eq:['lest'],u:'reps',r:[10,15],nf:1},
+ {k:'superman',c:'post',eq:['rien'],u:'reps',nf:1},
  {k:'hollow',c:'tronc',eq:['rien'],u:'sec'},
- {k:'hollowr',c:'tronc',eq:['rien'],u:'reps',r:[12,20]},
+ {k:'hollowr',c:'tronc',eq:['rien'],u:'reps',r:[12,20],nf:1},
  {k:'gainage',c:'tronc',eq:['rien'],u:'sec'},
  {k:'gainlat',c:'tronc',eq:['rien'],u:'sec'},
  {k:'lsit',c:'tronc',eq:['barre','rien'],u:'sec',r:[10,25]},
- {k:'superman',c:'tronc',eq:['rien'],u:'reps'},
- {k:'situp',c:'tronc',eq:['rien'],u:'reps',r:[12,20]},
- {k:'mount',c:'tronc',eq:['rien'],u:'reps',r:[16,24]},
- {k:'farmer',c:'tronc',eq:['lest'],u:'sec',r:[30,45]},
- {k:'burpee',c:'jambes',eq:['rien'],u:'reps',r:[8,12]}
+ {k:'legraise',c:'tronc',eq:['barre'],u:'reps',r:[6,12]},
+ {k:'dragon',c:'tronc',eq:['rien'],u:'reps',r:[3,8]},
+ {k:'situp',c:'tronc',eq:['rien'],u:'reps',r:[12,20],nf:1},
+ {k:'mount',c:'tronc',eq:['rien'],u:'reps',r:[16,24],nf:1},
+ {k:'farmer',c:'tronc',eq:['lest'],u:'sec',r:[30,45],nf:1},
+ {k:'tractsup',c:'bras',eq:['barre'],u:'reps',r:[5,10]},
+ {k:'curl',c:'bras',eq:['lest'],u:'reps'},
+ {k:'exttri',c:'bras',eq:['lest'],u:'reps'},
+ {k:'diamant',c:'bras',eq:['rien'],u:'reps'},
+ {k:'dips',c:'bras',eq:['rien','deniv'],u:'reps'},
+ {k:'revcurl',c:'bras',eq:['lest'],u:'reps',r:[10,15],nf:1},
+ {k:'wrist',c:'bras',eq:['lest'],u:'reps',r:[12,20],nf:1},
+ {k:'deadhang',c:'bras',eq:['barre'],u:'sec',r:[20,45],nf:1},
+ {k:'poign',c:'bras',eq:['rien'],u:'reps',r:[12,20],nf:1}
 ];
 /* Progression : quand le plafond de reps est atteint sur toutes les séries,
    l'exercice est remplacé par sa version plus dure (SUB), sinon on ajoute de la charge (+2 kg). */
@@ -622,21 +667,31 @@ const SUB={
  scap:{to:'tract',r:[5,10],u:'reps'},
  row:{to:'tract',r:[5,10],u:'reps'},
  archpull:{to:'uneven',r:[3,6],u:'side'},
- pompe:{to:'pompearch',r:[4,8],u:'side'},
+ pompe:{to:'pompedecl',r:[8,12],u:'reps'},
  pompetempo:{to:'pompearch',r:[4,8],u:'side'},
+ pompedecl:{to:'pompearch',r:[4,8],u:'side'},
  pompepiq:{to:'pikeel',r:[5,10],u:'reps'},
  pikeel:{to:'hspuneg',r:[3,5],u:'reps'},
+ dips:{to:'diamant',r:[8,12],u:'reps'},
  squat:{to:'squattempo',r:[8,12],u:'reps'},
- squattempo:{to:'bulg',r:[6,10],u:'side'},
+ squattempo:{to:'fente',r:[8,12],u:'side'},
  fente:{to:'bulg',r:[6,10],u:'side'},
  bulg:{to:'pistol',r:[3,6],u:'side'},
  stepup:{to:'stepsac',r:[8,12],u:'side'},
+ ponte:{to:'curlgliss',r:[6,12],u:'reps'},
+ curlgliss:{to:'nordic',r:[3,6],u:'reps'},
+ rdl1:{to:'hinge',r:[8,12],u:'reps'},
+ superman:{to:'ponte',r:[8,12],u:'side'},
  hollow:{to:'hollowr',r:[12,20],u:'reps'},
  hollowr:{to:'lsit',r:[10,25],u:'sec'},
  situp:{to:'hollowr',r:[12,20],u:'reps'},
  gainage:{to:'hollow',r:[20,40],u:'sec'},
- lsit:{to:'flt',r:[5,10],u:'sec'},
- mount:{to:'bear',r:[30,45],u:'sec'}
+ lsit:{to:'legraise',r:[6,12],u:'reps'},
+ legraise:{to:'dragon',r:[3,8],u:'reps'},
+ dragon:{to:'flt',r:[5,10],u:'sec'},
+ mount:{to:'bear',r:[30,45],u:'sec'},
+ poign:{to:'wrist',r:[12,20],u:'reps'},
+ deadhang:{to:'legraise',r:[6,12],u:'reps'}
 };
 function getAdv(){return store.g('adv',{})}
 function advance(k){const a=getAdv();const cur=a[k]||{s:0,l:0};
@@ -652,25 +707,37 @@ function resolve(p){const a=getAdv()[p.k]||{s:0,l:0};
 let rEqSel=new Set(['rien','barre','lest','deniv']),lastDraw=store.g('roul',null);
 if(lastDraw&&lastDraw.items&&lastDraw.items[0]&&!lastDraw.items[0].show)lastDraw=null;
 const rnd=(a,b)=>a+Math.floor(Math.random()*(b-a+1));
+const MODE={hyp:'Hypertrophie',force:'Force',fe:'Force-endurance'};
+let rMode='hyp';
 function drawSession(){
- const avail=POOL.filter(p=>p.eq.some(e=>rEqSel.has(e)));
- if(avail.length<6)return null;
- const n=rnd(6,8),series=rnd(4,5),pick=[],used=new Set(),shown=new Set();
+ const avail=POOL.filter(p=>p.eq.some(e=>rEqSel.has(e))&&(rMode!=='force'||!p.nf));
+ if(avail.length<5)return null;
+ const f=rMode==='force',fe=rMode==='fe';
+ const n=f?rnd(5,6):fe?rnd(5,7):rnd(6,8);
+ const series=f?rnd(3,4):fe?rnd(3,4):(n>=7?4:rnd(4,5));
+ const pick=[],used=new Set(),shown=new Set();
+ const rng=r=>f?(r.u==='sec'?[10,20]:[4,6])
+  :fe?(r.u==='sec'?[40,60]:r.u==='side'?[12,20]:[15,25]):r.b;
+ const val=r=>{const b=rng(r),v=rnd(b[0],b[1]);return r.u==='sec'?Math.round(v/5)*5:v};
  const take=p=>{const r=resolve(p);if(shown.has(r.show))return false;
-  pick.push(Object.assign({c:p.c},r,{v:rnd(r.b[0],r.b[1])}));used.add(p.k);shown.add(r.show);return true};
- ['tirage','poussee','jambes','tronc'].forEach(c=>{
+  pick.push(Object.assign({c:p.c},r,{v:val(r)}));used.add(p.k);shown.add(r.show);return true};
+ ['tirage','poussee','jambes','post','tronc','bras'].forEach(c=>{
+  if(pick.length>=n)return;
   const cs=avail.filter(p=>p.c===c&&!used.has(p.k)).sort(()=>Math.random()-.5);
   for(const p of cs){if(take(p))break}});
  const rest=avail.filter(p=>!used.has(p.k)).sort(()=>Math.random()-.5);
  for(const p of rest){if(pick.length>=n)break;
-  if(pick.filter(x=>x.c===p.c).length>=3)continue;take(p)}
- return{series:series,items:pick}}
+  if(pick.filter(x=>x.c===p.c).length>=2)continue;take(p)}
+ return{series:series,items:pick,mode:rMode}}
 function fmtItem(it){return it.u==='sec'?it.v+' s':it.u==='side'?it.v+' / côté':it.v+' reps'}
 function itemName(it){return EX[it.show][0]+(it.load?' (+'+it.load+' kg)':'')}
 function renderRoul(){const out=$('#rOut');
  if(!lastDraw){out.innerHTML='';return}
  out.innerHTML='<div style="border-top:1px solid var(--line);margin-top:12px;padding-top:10px">'+
- '<div style="font-weight:800;font-size:13.5px">'+lastDraw.items.length+' exercices · '+lastDraw.series+' séries</div>'+
+ '<div style="font-weight:800;font-size:13.5px">'+MODE[lastDraw.mode||'hyp']+' · '+lastDraw.items.length+' exercices · '+lastDraw.series+' séries · '+(lastDraw.items.length*lastDraw.series)+' séries au total</div>'+
+ '<p class="hint" style="margin-top:4px">Repos '+(lastDraw.mode==='force'?'2 à 3 min entre séries — le repos long fait partie du stimulus, ne le raccourcis pas'
+ :lastDraw.mode==='fe'?'30 à 45 s seulement — la récupération incomplète EST le stimulus. Enchaîne en circuit si tu préfères'
+ :'60 à 90 s entre séries, en gardant 1 à 2 reps en réserve')+'.</p>'+
  '<p class="hint" style="margin-top:4px">Plafond atteint (le haut de la fourchette sur TOUTES les séries) → tape ✓ : la roulette passera à la version plus dure, ou ajoutera +2 kg s\'il n\'y en a pas.</p>'+
  lastDraw.items.map((it,i)=>'<div class="ex"><b>'+(i+1)+'. '+itemName(it)+' — '+lastDraw.series+' × '+fmtItem(it)+'</b><p>'+EX[it.show][1]+'</p>'+
   '<button class="chip" data-adv="'+i+'" style="margin-top:6px">✓ Plafond sur toutes les séries</button>'+
@@ -688,6 +755,13 @@ function renderRoul(){const out=$('#rOut');
   s:lastDraw.items.map((it,i)=>(i+1)+'. '+itemName(it)+' — '+lastDraw.series+' × '+fmtItem(it)),
   x:lastDraw.items.map(it=>it.show),tm:{m:'chrono'}})}
 function initRoul(){const row=$('#rEq');
+ const mrow=document.createElement('div');mrow.className='frow';
+ Object.keys(MODE).forEach(k=>{const b=document.createElement('button');
+  b.className='chip'+(k===rMode?' on':'');b.textContent=MODE[k];
+  b.onclick=()=>{rMode=k;mrow.querySelectorAll('.chip').forEach(x=>x.classList.remove('on'));b.classList.add('on')};
+  mrow.appendChild(b)});
+ const lbl=document.createElement('div');lbl.className='flabel';lbl.textContent='Objectif';
+ row.parentNode.insertBefore(lbl,row.previousSibling);row.parentNode.insertBefore(mrow,row.previousSibling);
  Object.keys(EQ).filter(k=>k!=='course').forEach(k=>{
   const b=document.createElement('button');b.className='chip'+(rEqSel.has(k)?' on':'');b.textContent=EQ[k];
   b.onclick=()=>{rEqSel.has(k)?rEqSel.delete(k):rEqSel.add(k);b.classList.toggle('on')};
@@ -696,6 +770,42 @@ function initRoul(){const row=$('#rEq');
   if(!d){$('#rOut').innerHTML='<p class="hint" style="margin-top:10px">Pas assez d\'exercices avec cette sélection — coche au moins « Sans matériel ».</p>';return}
   lastDraw=d;store.s('roul',d);renderRoul()};
  renderRoul()}
+
+/* ── Split hypertrophie 4 séances ─────────────────────────── */
+const SPLIT=[
+{id:'ha',n:"Haut A — poussée dominante",f:"~55 min · 24 séries",
+ d:"Pectoraux, épaules, triceps en volume, tirage en entretien. Le jour où les doigts ne travaillent pas.",
+ it:[["pompelest",4,"8-12"],["pushpress",4,"8-12"],["tractsup",4,"6-10"],["row",3,"10-15"],
+     ["lateral",3,"12-15"],["exttri",3,"10-15"],["wrist",3,"15-20"]]},
+{id:'ba',n:"Bas A — quadriceps dominant",f:"~55 min · 24 séries",
+ d:"Quadriceps et fessiers en charge, ischios en complément, tronc en fin de séance.",
+ it:[["squatlest",4,"8-12"],["bulg",3,"8-12 / côté"],["hipthrust",4,"10-15"],["curlgliss",3,"8-12"],
+     ["calf",4,"12-20 / côté"],["legraise",3,"8-12"],["gainlat",3,"30-40 s / côté"]]},
+{id:'hb',n:"Haut B — tirage dominant",f:"~60 min · 25 séries",
+ d:"Dos et biceps en volume, poussée verticale, deltoïde postérieur. La séance la plus utile au grimpeur.",
+ it:[["tractlest",5,"5-8"],["row",4,"8-12"],["pikeel",4,"6-10"],["diamant",3,"10-15"],
+     ["curl",3,"8-12"],["rearfly",3,"12-15"],["deadhang",3,"30-45 s"]]},
+{id:'bb',n:"Bas B — chaîne postérieure dominante",f:"~55 min · 24 séries",
+ d:"Ischios et fessiers en charge — le versant que l'escalade ne développe jamais. Unilatéral appuyé.",
+ it:[["hinge",4,"8-12"],["rdl1",3,"8-12 / côté"],["nordic",3,"3-6"],["stepsac",4,"10-12 / côté"],
+     ["pistol",3,"3-6 / côté"],["calf",4,"12-20 / côté"],["hollow",3,"30-40 s"]]}
+];
+function renderSplit(){const box=$('#split');box.innerHTML='';
+ SPLIT.forEach(s=>{const c=document.createElement('div');c.className='card';
+  c.innerHTML='<div class="rname">'+s.n+'</div><div class="rmeta">'+s.f+'</div>'+
+  '<p style="font-size:12.5px;color:var(--muted);margin-top:6px">'+s.d+'</p>'+
+  '<details open><summary>Séance</summary>'+
+   s.it.map((x,i)=>'<div style="display:flex;gap:8px;font-size:13.5px;padding:4px 0;border-bottom:1px solid var(--line)">'+
+   '<span style="color:var(--muted);font-family:var(--mono);font-size:11.5px;padding-top:2px">'+(i+1)+'</span>'+
+   '<span style="flex:1"><b>'+EX[x[0]][0]+'</b></span>'+
+   '<span style="font-family:var(--mono);font-size:12px;white-space:nowrap">'+x[1]+' × '+x[2]+'</span></div>').join('')+
+  '</details>'+
+  '<details><summary>Exécution des mouvements</summary>'+s.it.map(x=>'<div class="ex"><b>'+EX[x[0]][0]+'</b><p>'+EX[x[0]][1]+'</p></div>').join('')+'</details>'+
+  '<button class="btn btn-ghost" style="margin-top:10px" data-s="'+s.id+'">Lancer — chrono libre</button>';
+  c.querySelector('button').onclick=()=>openW({n:s.n,
+   s:s.it.map((x,i)=>(i+1)+'. '+EX[x[0]][0]+' — '+x[1]+' × '+x[2]),
+   x:s.it.map(x=>x[0]),tm:{m:'chrono'}});
+  box.appendChild(c)})}
 
 /* ── Installation ─────────────────────────────────────────── */
 (function(){
