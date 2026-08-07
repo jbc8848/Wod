@@ -73,18 +73,56 @@ details[open]>summary::before{content:'▾ '}
 .p-btn{flex:1;max-width:200px;border:none;border-radius:999px;padding:16px;font-weight:800;font-size:15px;font-family:var(--font);cursor:pointer;background:#F7F5F1;color:var(--ink)}
 .p-btn.ghost{background:none;border:1.5px solid rgba(247,245,241,.35);color:#F7F5F1}
 @media(prefers-reduced-motion:reduce){*{transition:none!important}}
+/* navigation */
+#topbar{position:sticky;top:0;z-index:20;display:flex;align-items:center;gap:10px;
+ background:rgba(247,245,241,.94);backdrop-filter:blur(8px);border-bottom:1px solid var(--line);
+ padding:calc(10px + env(safe-area-inset-top)) 16px 10px}
+#back{display:none;background:none;border:none;font-size:26px;line-height:1;color:var(--ink);
+ cursor:pointer;padding:0 6px 0 0;font-family:var(--font);font-weight:400}
+#topbar.sub #back{display:block}
+#tbTitle{flex:1;font-size:12px;letter-spacing:.14em;text-transform:uppercase;font-weight:800;color:var(--muted);
+ overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#ver{font-family:var(--mono);font-size:10px;color:var(--muted);opacity:.7}
+.view{display:none}
+.view.on{display:block;animation:fade .18s ease}
+@keyframes fade{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+.menu{display:flex;flex-direction:column;gap:8px;margin-top:6px}
+.mi{display:block;width:100%;text-align:left;background:var(--card);border:1px solid var(--line);
+ border-radius:var(--r);padding:15px 16px;cursor:pointer;font-family:var(--font);position:relative}
+.mi:active{background:#f2efe9}
+.mi b{display:block;font-size:15.5px;font-weight:800;color:var(--ink);margin-bottom:3px;padding-right:18px}
+.mi span{display:block;font-size:12.5px;color:var(--muted);line-height:1.4;padding-right:18px}
+.mi::after{content:'›';position:absolute;right:16px;top:50%;transform:translateY(-50%);
+ color:var(--muted);opacity:.5;font-size:22px}
+.view .filters{top:52px}
 </style></head>
-<body><div class="wrap">
-<div class="kicker">OPPORTUNISTE · <span id="ver">v9 · 07.08.26</span></div>
+<body>
+<div id="topbar">
+ <button id="back" aria-label="Retour">‹</button>
+ <div id="tbTitle">Opportuniste</div>
+ <div id="ver">v11 · 07.08.26</div>
+</div>
+<div class="wrap">
 <div id="inst" style="display:none;background:var(--ink);color:#F7F5F1;border-radius:var(--r);padding:14px;margin:10px 0">
  <div style="font-weight:800;font-size:14px">Installer l'application</div>
  <div id="instTxt" style="font-size:12.5px;color:rgba(247,245,241,.7);margin-top:4px"></div>
  <button id="instBtn" class="btn" style="background:#F7F5F1;color:var(--ink);margin-top:10px;display:none">Installer</button>
 </div>
-<h1>Séances opportunistes</h1>
-<div class="sub">Ce que tu peux faire là où tu es, avec ce que tu as. WOD et benchmarks nommés d'un côté, séances montées sur mesure de l'autre — orientation grimpeur-alpiniste : tirage, tronc, dénivelé, port de charge.</div>
-<div class="note"><b>48 séances</b> + 2 programmes évolutifs. Filtre par type, contexte, matériel et durée. Le contexte <b>Voyage</b> isole ce qui tient dans 2 m², sans matériel et sans bruit — chambre d'hôtel, refuge, aéroport. Le fractionné course et home-trainer reste dans <b>Conditionnement</b>.</div>
 
+<section class="view on" id="v-home">
+<h1>Opportuniste</h1>
+<div class="sub">Grimpeur-alpiniste. Ce que tu peux faire là où tu es, avec ce que tu as.</div>
+<div class="menu">
+ <button class="mi" data-go="roul"><b>Roulette</b><span>Séance tirée au sort — force, hypertrophie ou force-endurance, selon ton matériel</span></button>
+ <button class="mi" data-go="split"><b>Split</b><span>Programme structuré 4 séances par semaine — blocs ou ondulé</span></button>
+ <button class="mi" data-go="sess"><b>Séances &amp; WOD</b><span>48 séances : benchmarks nommés, opportunistes, voyage</span></button>
+ <button class="mi" data-go="prog"><b>Programmes évolutifs</b><span>Handstand push-up et traction à un bras, par niveaux</span></button>
+ <button class="mi" data-go="hist"><b>Historique</b><span>Tes temps et scores enregistrés</span></button>
+ <button class="mi" data-go="aide"><b>Substitutions</b><span>Quoi faire quand il manque du matériel</span></button>
+</div>
+</section>
+
+<section class="view" id="v-roul">
 <h2 style="font-size:14px;color:var(--ink);margin-top:26px">Roulette</h2>
 <div class="card" id="roul">
 <div class="rname">Séance tirée au sort</div>
@@ -95,8 +133,15 @@ details[open]>summary::before{content:'▾ '}
 <button class="btn btn-primary" id="rGo" style="margin-top:10px">Tirer une séance</button>
 <div id="rOut"></div>
 </div>
+</section>
 
+<section class="view" id="v-split">
+<h2 style="font-size:14px;color:var(--ink);margin-top:26px">Split</h2>
+<div class="note"><b>Deux modèles, à choisir ci-dessous.</b> Placement type : Haut A lundi · Bas A mardi · Haut B jeudi · Bas B vendredi, escalade les autres jours. Ne mets jamais une séance de tirage lourd la veille d'une séance de doigts. Progression : double progression — quand tu tiens le haut de la fourchette sur TOUTES les séries, ajoute 1 à 2 kg la fois suivante.</div>
+<div id="split"></div>
+</section>
 
+<section class="view" id="v-sess">
 <div class="filters">
 <div class="flabel">Programmes évolutifs</div><div class="frow" id="fProg"></div>
 <div class="flabel">Type</div><div class="frow" id="fType"></div>
@@ -104,16 +149,19 @@ details[open]>summary::before{content:'▾ '}
 <div class="flabel">Matériel</div><div class="frow" id="fEq"></div>
 <div class="flabel">Durée</div><div class="frow" id="fDur"></div>
 </div>
-
 <div id="list"></div>
+</section>
 
-<h2 style="font-size:14px;color:var(--ink);margin-top:26px">Split hypertrophie</h2>
-<div class="note"><b>4 séances, chaque muscle 2× par semaine.</b> Placement type : Haut A lundi · Bas A mardi · Haut B jeudi · Bas B vendredi, escalade les autres jours. Ne mets jamais Haut B (tirage lourd) la veille d'une séance de doigts. Progression : double progression — quand tu tiens le haut de la fourchette sur TOUTES les séries, ajoute 1 à 2 kg la fois suivante. Volume hebdomadaire : 14 à 17 séries par groupe musculaire, dans la fourchette qui fait consensus.</div>
-<div id="split"></div>
-
+<section class="view" id="v-prog">
 <h2 style="font-size:14px;color:var(--ink);margin-top:26px">Programmes évolutifs</h2>
 <div id="progs"></div>
+</section>
 
+<section class="view" id="v-hist">
+<h2>Historique local</h2><div id="hist"></div>
+</section>
+
+<section class="view" id="v-aide">
 <h2>Substitutions</h2>
 <div class="card">
 <div style="font-size:13px;margin-bottom:6px"><b>Pas de barre</b> — tractions → tirage sur table/rebord, ou rowing australien sous une barre basse</div>
@@ -122,8 +170,7 @@ details[open]>summary::before{content:'▾ '}
 <div style="font-size:13px;margin-bottom:6px"><b>Pas de dénivelé</b> — montées → 2 min de corde, navettes, ou burpees</div>
 <p class="hint">Principe : on substitue par le temps d'effort et la filière sollicitée, jamais par un compte arbitraire de répétitions.</p>
 </div>
-
-<h2>Historique local</h2><div id="hist"></div>
+</section>
 </div>
 
 <div id="player">
@@ -586,14 +633,17 @@ document.addEventListener('DOMContentLoaded',()=>{
  PROG.forEach(p=>{const b=document.createElement('button');b.className='chip';
   const lv=Math.min(Math.max(store.g('lvl:'+p.id,1),1),p.lv.length);
   b.textContent=p.n+' · N'+lv;
-  b.onclick=()=>{const el=document.getElementById('prog-'+p.id);if(!el)return;
-   el.scrollIntoView({behavior:'smooth',block:'start'});
-   el.querySelector('details').open=true;
-   el.style.transition='box-shadow .3s';el.style.boxShadow='0 0 0 2.5px var(--amber)';
-   setTimeout(()=>{el.style.boxShadow=''},1600)};
+  b.onclick=()=>{go('prog');const el=document.getElementById('prog-'+p.id);if(!el)return;
+   setTimeout(()=>{el.scrollIntoView({behavior:'smooth',block:'start'});
+    el.querySelector('details').open=true;
+    el.style.transition='box-shadow .3s';el.style.boxShadow='0 0 0 2.5px var(--amber)';
+    setTimeout(()=>{el.style.boxShadow=''},1600)},60)};
   $('#fProg').appendChild(b)});
  chips($('#fType'),TYPE,()=>fType,v=>fType=v);chips($('#fCtx'),CTX,()=>fCtx,v=>fCtx=v);chips($('#fEq'),EQ,()=>fEq,v=>fEq=v);chips($('#fDur'),DUR,()=>fDur,v=>fDur=v);
  render();renderProgs();renderSplit();renderHist();initRoul();
+ document.querySelectorAll('[data-go]').forEach(b=>b.onclick=()=>go(b.dataset.go));
+ $('#back').onclick=()=>go('home');
+ go(location.hash.slice(1)||'home',false);
  $('#pMain').onclick=()=>{if(!S||S.done)return;
   if(S.run){S.acc+=Date.now()-S.t0;S.t0=null;S.run=false;clearInterval(tick);$('#pMain').textContent='Reprendre'}
   else{S.t0=Date.now();S.run=true;tick=setInterval(draw,200);$('#pMain').textContent='Pause';beep(784,.15)}};
@@ -771,28 +821,65 @@ function initRoul(){const row=$('#rEq');
   lastDraw=d;store.s('roul',d);renderRoul()};
  renderRoul()}
 
-/* ── Split hypertrophie 4 séances ─────────────────────────── */
-const SPLIT=[
-{id:'ha',n:"Haut A — poussée dominante",f:"~55 min · 24 séries",
- d:"Pectoraux, épaules, triceps en volume, tirage en entretien. Le jour où les doigts ne travaillent pas.",
- it:[["pompelest",4,"8-12"],["pushpress",4,"8-12"],["tractsup",4,"6-10"],["row",3,"10-15"],
-     ["lateral",3,"12-15"],["exttri",3,"10-15"],["wrist",3,"15-20"]]},
-{id:'ba',n:"Bas A — quadriceps dominant",f:"~55 min · 24 séries",
- d:"Quadriceps et fessiers en charge, ischios en complément, tronc en fin de séance.",
- it:[["squatlest",4,"8-12"],["bulg",3,"8-12 / côté"],["hipthrust",4,"10-15"],["curlgliss",3,"8-12"],
-     ["calf",4,"12-20 / côté"],["legraise",3,"8-12"],["gainlat",3,"30-40 s / côté"]]},
-{id:'hb',n:"Haut B — tirage dominant",f:"~60 min · 25 séries",
- d:"Dos et biceps en volume, poussée verticale, deltoïde postérieur. La séance la plus utile au grimpeur.",
- it:[["tractlest",5,"5-8"],["row",4,"8-12"],["pikeel",4,"6-10"],["diamant",3,"10-15"],
-     ["curl",3,"8-12"],["rearfly",3,"12-15"],["deadhang",3,"30-45 s"]]},
-{id:'bb',n:"Bas B — chaîne postérieure dominante",f:"~55 min · 24 séries",
- d:"Ischios et fessiers en charge — le versant que l'escalade ne développe jamais. Unilatéral appuyé.",
- it:[["hinge",4,"8-12"],["rdl1",3,"8-12 / côté"],["nordic",3,"3-6"],["stepsac",4,"10-12 / côté"],
-     ["pistol",3,"3-6 / côté"],["calf",4,"12-20 / côté"],["hollow",3,"30-40 s"]]}
-];
+/* ── Splits : blocs (hypertrophie pure) ou ondulé (force + hypertrophie) ── */
+const SPLITS={
+bloc:{n:'Blocs — hypertrophie',
+ note:"4 séances, chaque muscle 2× par semaine, tout en 8-12 reps. Le modèle à suivre 8 semaines si tu vises la prise de masse, avec un léger surplus calorique. Repos 60-90 s.",
+ s:[
+ {id:'ha',n:"Haut A — poussée dominante",q:'hyp',f:"~55 min · 24 séries",
+  d:"Pectoraux, épaules, triceps en volume, tirage en entretien.",
+  it:[["pompelest",4,"8-12"],["pushpress",4,"8-12"],["tractsup",4,"6-10"],["row",3,"10-15"],
+      ["lateral",3,"12-15"],["exttri",3,"10-15"],["wrist",3,"15-20"]]},
+ {id:'ba',n:"Bas A — quadriceps dominant",q:'hyp',f:"~55 min · 24 séries",
+  d:"Quadriceps et fessiers en charge, ischios en complément.",
+  it:[["squatlest",4,"8-12"],["bulg",3,"8-12 / côté"],["hipthrust",4,"10-15"],["curlgliss",3,"8-12"],
+      ["calf",4,"12-20 / côté"],["legraise",3,"8-12"],["gainlat",3,"30-40 s / côté"]]},
+ {id:'hb',n:"Haut B — tirage dominant",q:'hyp',f:"~60 min · 25 séries",
+  d:"Dos et biceps en volume, poussée verticale, deltoïde postérieur.",
+  it:[["tractlest",5,"5-8"],["row",4,"8-12"],["pikeel",4,"6-10"],["diamant",3,"10-15"],
+      ["curl",3,"8-12"],["rearfly",3,"12-15"],["deadhang",3,"30-45 s"]]},
+ {id:'bb',n:"Bas B — chaîne postérieure dominante",q:'hyp',f:"~55 min · 24 séries",
+  d:"Ischios et fessiers — le versant que l'escalade ne développe jamais.",
+  it:[["hinge",4,"8-12"],["rdl1",3,"8-12 / côté"],["nordic",3,"3-6"],["stepsac",4,"10-12 / côté"],
+      ["pistol",3,"3-6 / côté"],["calf",4,"12-20 / côté"],["hollow",3,"30-40 s"]]}]},
+
+ond:{n:'Ondulé — force + hypertrophie',
+ note:"Chaque muscle reçoit une exposition LOURDE et une exposition VOLUME dans la même semaine. Tu ne lâches jamais le lourd, et tu gardes le stimulus de masse. À tenir aussi longtemps que tu progresses — pas de date de fin.",
+ s:[
+ {id:'oha',n:"Haut A — FORCE",q:'force',f:"~60 min · 24 séries · repos 2-3 min",
+  d:"Tirage et poussée lourds. La séance qui fait avancer tractions lestées et HSPU. Jamais la veille d'une séance de doigts.",
+  it:[["tractlest",5,"4-6"],["pompelest",5,"4-6"],["pushpress",4,"5-6"],["row",4,"6-8"],
+      ["curl",3,"6-8"],["wrist",3,"12-15"]]},
+ {id:'oba',n:"Bas A — VOLUME",q:'hyp',f:"~55 min · 24 séries · repos 60-90 s",
+  d:"Quadriceps et fessiers en 8-12, tronc en fin de séance. Séance longue mais peu traumatisante.",
+  it:[["squatlest",4,"8-12"],["bulg",3,"8-12 / côté"],["hipthrust",4,"10-15"],["curlgliss",3,"8-12"],
+      ["calf",4,"12-20 / côté"],["legraise",3,"8-12"],["gainlat",3,"30-40 s / côté"]]},
+ {id:'ohb',n:"Haut B — VOLUME",q:'hyp',f:"~60 min · 24 séries · repos 60-90 s",
+  d:"Même musculature qu'en Haut A, mais en 8-15 reps et sur des variantes différentes. C'est le volume qui construit la masse.",
+  it:[["tractsup",4,"8-12"],["pompedecl",4,"10-15"],["pikeel",4,"8-12"],["diamant",3,"10-15"],
+      ["lateral",3,"12-15"],["rearfly",3,"12-15"],["deadhang",3,"30-45 s"]]},
+ {id:'obb',n:"Bas B — FORCE",q:'force',f:"~55 min · 24 séries · repos 2-3 min",
+  d:"Chaîne postérieure et unilatéral lourds. Le nordic curl et le pistol se travaillent ici, jamais en fin de séance fatiguée.",
+  it:[["hinge",5,"4-6"],["nordic",4,"3-6"],["stepsac",4,"6-8 / côté"],["pistol",4,"3-6 / côté"],
+      ["rdl1",3,"6-8 / côté"],["hollow",3,"20-30 s"]]},
+ {id:'ofe',n:"Optionnel — FORCE-ENDURANCE",q:'fe',f:"~30 min · en circuit · repos 30-45 s",
+  d:"Séance courte à caler un jour léger, ou en remplacement si la semaine déborde. C'est la qualité la plus transférable à une longue voie ou une arête.",
+  it:[["squat",3,"20-25"],["pompe",3,"15-20"],["row",3,"15-20"],["fente",3,"15-20 / côté"],
+      ["gainage",3,"45-60 s"],["burpee",3,"15-20"]]}]}
+};
+let splitSel=store.g('splitsel','bloc');
 function renderSplit(){const box=$('#split');box.innerHTML='';
- SPLIT.forEach(s=>{const c=document.createElement('div');c.className='card';
-  c.innerHTML='<div class="rname">'+s.n+'</div><div class="rmeta">'+s.f+'</div>'+
+ const row=document.createElement('div');row.className='frow';row.style.marginBottom='10px';
+ Object.keys(SPLITS).forEach(k=>{const b=document.createElement('button');
+  b.className='chip'+(k===splitSel?' on':'');b.textContent=SPLITS[k].n;
+  b.onclick=()=>{splitSel=k;store.s('splitsel',k);renderSplit()};row.appendChild(b)});
+ box.appendChild(row);
+ const nt=document.createElement('div');nt.className='note';nt.innerHTML=SPLITS[splitSel].note;box.appendChild(nt);
+ const badge={force:['FORCE','var(--hot)'],hyp:['VOLUME','var(--cool)'],fe:['FORCE-ENDURANCE','var(--amber)']};
+ SPLITS[splitSel].s.forEach(s=>{const c=document.createElement('div');c.className='card';
+  const bd=badge[s.q];
+  c.innerHTML='<div class="tags" style="margin:0 0 6px"><span class="tag" style="color:'+bd[1]+';border-color:'+bd[1]+'">'+bd[0]+'</span></div>'+
+  '<div class="rname">'+s.n+'</div><div class="rmeta">'+s.f+'</div>'+
   '<p style="font-size:12.5px;color:var(--muted);margin-top:6px">'+s.d+'</p>'+
   '<details open><summary>Séance</summary>'+
    s.it.map((x,i)=>'<div style="display:flex;gap:8px;font-size:13.5px;padding:4px 0;border-bottom:1px solid var(--line)">'+
@@ -801,11 +888,22 @@ function renderSplit(){const box=$('#split');box.innerHTML='';
    '<span style="font-family:var(--mono);font-size:12px;white-space:nowrap">'+x[1]+' × '+x[2]+'</span></div>').join('')+
   '</details>'+
   '<details><summary>Exécution des mouvements</summary>'+s.it.map(x=>'<div class="ex"><b>'+EX[x[0]][0]+'</b><p>'+EX[x[0]][1]+'</p></div>').join('')+'</details>'+
-  '<button class="btn btn-ghost" style="margin-top:10px" data-s="'+s.id+'">Lancer — chrono libre</button>';
+  '<button class="btn btn-ghost" style="margin-top:10px">Lancer — chrono libre</button>';
   c.querySelector('button').onclick=()=>openW({n:s.n,
    s:s.it.map((x,i)=>(i+1)+'. '+EX[x[0]][0]+' — '+x[1]+' × '+x[2]),
    x:s.it.map(x=>x[0]),tm:{m:'chrono'}});
   box.appendChild(c)})}
+
+/* ── Navigation ───────────────────────────────────────────── */
+const VIEWS={home:'Opportuniste',roul:'Roulette',split:'Split',sess:'Séances & WOD',
+ prog:'Programmes évolutifs',hist:'Historique',aide:'Substitutions'};
+function go(v,push){if(!VIEWS[v])v='home';
+ document.querySelectorAll('.view').forEach(s=>s.classList.toggle('on',s.id==='v-'+v));
+ $('#tbTitle').textContent=VIEWS[v];
+ $('#topbar').classList.toggle('sub',v!=='home');
+ window.scrollTo(0,0);
+ if(push!==false&&location.hash!=='#'+v)location.hash=v}
+window.addEventListener('hashchange',()=>go(location.hash.slice(1)||'home',false));
 
 /* ── Installation ─────────────────────────────────────────── */
 (function(){
