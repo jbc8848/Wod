@@ -100,7 +100,7 @@ details[open]>summary::before{content:'▾ '}
 <div id="topbar">
  <button id="back" aria-label="Retour">‹</button>
  <div id="tbTitle">Opportuniste</div>
- <div id="ver">v11 · 07.08.26</div>
+ <div id="ver">v14 · 08.08.26</div>
 </div>
 <div class="wrap">
 <div id="inst" style="display:none;background:var(--ink);color:#F7F5F1;border-radius:var(--r);padding:14px;margin:10px 0">
@@ -117,6 +117,8 @@ details[open]>summary::before{content:'▾ '}
  <button class="mi" data-go="split"><b>Split</b><span>Programme structuré 4 séances par semaine — blocs ou ondulé</span></button>
  <button class="mi" data-go="sess"><b>Séances &amp; WOD</b><span>48 séances : benchmarks nommés, opportunistes, voyage</span></button>
  <button class="mi" data-go="prog"><b>Programmes évolutifs</b><span>Handstand push-up et traction à un bras, par niveaux</span></button>
+ <button class="mi" data-go="lib"><b>Mouvements</b><span>Bibliothèque : chercher, parcourir par famille, ou en tirer un au hasard</span></button>
+ <button class="mi" id="miRand"><b>Au hasard</b><span>Tu ne sais pas quoi faire — une séance tirée au sort parmi les 48</span></button>
  <button class="mi" data-go="hist"><b>Historique</b><span>Tes temps et scores enregistrés</span></button>
  <button class="mi" data-go="aide"><b>Substitutions</b><span>Quoi faire quand il manque du matériel</span></button>
 </div>
@@ -142,6 +144,12 @@ details[open]>summary::before{content:'▾ '}
 </section>
 
 <section class="view" id="v-sess">
+<div class="card" style="background:var(--ink);color:#F7F5F1;border-color:var(--ink)">
+ <div style="font-weight:800;font-size:15px">Tu ne sais pas quoi faire ?</div>
+ <div style="font-size:12.5px;color:rgba(247,245,241,.7);margin-top:3px">Tire une séance au hasard parmi celles que tes filtres laissent passer.</div>
+ <button class="btn" id="wodGo" style="background:#F7F5F1;color:var(--ink);margin-top:10px">Tirer une séance au sort</button>
+</div>
+<div id="wodOut"></div>
 <div class="filters">
 <div class="flabel">Programmes évolutifs</div><div class="frow" id="fProg"></div>
 <div class="flabel">Type</div><div class="frow" id="fType"></div>
@@ -155,6 +163,17 @@ details[open]>summary::before{content:'▾ '}
 <section class="view" id="v-prog">
 <h2 style="font-size:14px;color:var(--ink);margin-top:26px">Programmes évolutifs</h2>
 <div id="progs"></div>
+</section>
+
+<section class="view" id="v-lib">
+<div class="card" style="background:var(--ink);color:#F7F5F1;border-color:var(--ink)">
+ <div style="font-weight:800;font-size:15px">Bibliothèque de mouvements</div>
+ <div style="font-size:12.5px;color:rgba(247,245,241,.7);margin-top:3px">Cherche, parcours par famille, ou tire un mouvement au hasard pour t'y mettre.</div>
+ <button class="btn" id="libGo" style="background:#F7F5F1;color:var(--ink);margin-top:10px">Tirer un mouvement au sort</button>
+</div>
+<input id="libQ" placeholder="Chercher un mouvement…" style="width:100%;border:1px solid var(--line);border-radius:10px;padding:11px 13px;font-family:var(--font);font-size:14px;background:var(--card);color:var(--ink);margin:10px 0">
+<div class="frow" id="libCat"></div>
+<div id="libOut"></div>
 </section>
 
 <section class="view" id="v-hist">
@@ -643,6 +662,9 @@ document.addEventListener('DOMContentLoaded',()=>{
  render();renderProgs();renderSplit();renderHist();initRoul();
  document.querySelectorAll('[data-go]').forEach(b=>b.onclick=()=>go(b.dataset.go));
  $('#back').onclick=()=>go('home');
+ initLib();
+ $('#wodGo').onclick=drawWod;
+ $('#miRand').onclick=()=>{go('sess');drawWod()};
  go(location.hash.slice(1)||'home',false);
  $('#pMain').onclick=()=>{if(!S||S.done)return;
   if(S.run){S.acc+=Date.now()-S.t0;S.t0=null;S.run=false;clearInterval(tick);$('#pMain').textContent='Reprendre'}
@@ -656,6 +678,7 @@ document.addEventListener('DOMContentLoaded',()=>{
 /* cat: tirage/poussee/jambes/tronc · u: reps | sec | side (par côté) · r: bornes propres si 8-12 ne convient pas */
 const POOL=[
  {k:'tract',c:'tirage',eq:['barre'],u:'reps',r:[5,10]},
+ {k:'tractlest',c:'tirage',eq:['barre','lest'],u:'reps',r:[5,8]},
  {k:'tractneg',c:'tirage',eq:['barre'],u:'reps',r:[3,6]},
  {k:'scap',c:'tirage',eq:['barre'],u:'reps',nf:1},
  {k:'row',c:'tirage',eq:['barre'],u:'reps'},
@@ -744,11 +767,39 @@ const SUB={
  deadhang:{to:'legraise',r:[6,12],u:'reps'}
 };
 function getAdv(){return store.g('adv',{})}
-function advance(k){const a=getAdv();const cur=a[k]||{s:0,l:0};
- if(cur.s===0&&SUB[k]){cur.s=1;a[k]=cur;store.s('adv',a);
-  return 'Prochain tirage : '+EX[SUB[k].to][0]}
- cur.l+=2;a[k]=cur;store.s('adv',a);
- return 'Prochain tirage : +'+cur.l+' kg (sac, gilet ou KB plus lourde)'}
+/* Autorégulation : on saisit les reps réellement faites sur la dernière série,
+   et la prescription suivante monte, se maintient ou redescend. */
+function autoreg(k,reps,lo,hi){const a=getAdv(),c=a[k]||{s:0,l:0};
+ c.last=reps;let msg;
+ if(reps>=hi){                                  /* plafond tenu → on durcit */
+  if(c.s===0&&SUB[k]){c.s=1;msg='Plafond tenu → passage à '+EX[SUB[k].to][0]+' la prochaine fois'}
+  else{c.l+=2;msg='Plafond tenu → +'+c.l+' kg au total la prochaine fois'}}
+ else if(reps>=lo){                             /* dans la fourchette → on répète */
+  msg='Dans la fourchette → même prescription la prochaine fois, vise le haut'}
+ else{                                          /* sous la fourchette → on allège */
+  if(c.l>0){c.l=Math.max(0,c.l-2);msg='Sous la fourchette → charge ramenée à +'+c.l+' kg'}
+  else if(c.s===1){c.s=0;msg='Sous la fourchette → retour à '+EX[k][0]+' la prochaine fois'}
+  else msg='Sous la fourchette → on garde l\'exercice, vise le bas de la fourchette'}
+ a[k]=c;store.s('adv',a);return msg}
+function lastOf(k){const a=getAdv()[k];return a&&a.last?a.last:null}
+/* Contrôle de saisie réutilisable partout */
+function repCtl(k,lo,hi){const l=lastOf(k);
+ return '<div style="display:flex;gap:6px;align-items:center;margin-top:6px">'+
+  '<input type="number" inputmode="numeric" data-rep="'+k+'" placeholder="reps dernière série" '+
+   'style="flex:1;min-width:0;border:1px solid var(--line);border-radius:8px;padding:7px 9px;font-family:var(--font);font-size:12.5px;background:var(--card);color:var(--ink)">'+
+  '<button class="chip" data-ok="'+k+'|'+lo+'|'+hi+'" style="padding:7px 12px">Valider</button></div>'+
+  (l?'<span class="hint" style="display:block;margin-top:3px">dernière fois : '+l+'</span>':'')+
+  '<span class="hint" data-capmsg="'+k+'" style="display:block;color:var(--cool);font-weight:700;margin-top:3px"></span>'}
+function wireRep(c,after){c.querySelectorAll('[data-ok]').forEach(b=>{b.onclick=()=>{
+ const p=b.dataset.ok.split('|'),k=p[0],lo=+p[1],hi=+p[2];
+ const inp=c.querySelector('[data-rep="'+k+'"]'),v=parseInt(inp.value,10);
+ if(isNaN(v)||v<0){inp.style.borderColor='var(--hot)';return}
+ inp.style.borderColor='var(--line)';
+ c.querySelector('[data-capmsg="'+k+'"]').textContent=autoreg(k,v,lo,hi);
+ b.disabled=true;b.style.opacity=.4;inp.disabled=true;if(after)after()}})}
+function bounds(str){const m=String(str).match(/(\d+)\s*[-–]\s*(\d+)/);
+ return m?[+m[1],+m[2]]:[0,parseInt(str,10)||0]}
+function advance(k){return autoreg(k,9999,0,0)}
 function resolve(p){const a=getAdv()[p.k]||{s:0,l:0};
  if(a.s&&SUB[p.k]){const s=SUB[p.k];return{k:p.k,show:s.to,u:s.u,b:s.r,load:a.l}}
  const b=p.r||(p.u==='sec'?[20,40]:[8,12]);
@@ -788,16 +839,13 @@ function renderRoul(){const out=$('#rOut');
  '<p class="hint" style="margin-top:4px">Repos '+(lastDraw.mode==='force'?'2 à 3 min entre séries — le repos long fait partie du stimulus, ne le raccourcis pas'
  :lastDraw.mode==='fe'?'30 à 45 s seulement — la récupération incomplète EST le stimulus. Enchaîne en circuit si tu préfères'
  :'60 à 90 s entre séries, en gardant 1 à 2 reps en réserve')+'.</p>'+
- '<p class="hint" style="margin-top:4px">Plafond atteint (le haut de la fourchette sur TOUTES les séries) → tape ✓ : la roulette passera à la version plus dure, ou ajoutera +2 kg s\'il n\'y en a pas.</p>'+
+ '<p class="hint" style="margin-top:4px">À la fin de chaque exercice, entre les reps réellement faites sur ta dernière série : la prescription suivante s\'ajuste à la hausse, se maintient, ou s\'allège.</p>'+
  lastDraw.items.map((it,i)=>'<div class="ex"><b>'+(i+1)+'. '+itemName(it)+' — '+lastDraw.series+' × '+fmtItem(it)+'</b><p>'+EX[it.show][1]+'</p>'+
-  '<button class="chip" data-adv="'+i+'" style="margin-top:6px">✓ Plafond sur toutes les séries</button>'+
-  '<span class="hint" data-msg="'+i+'" style="display:block;margin-top:4px;color:var(--cool);font-weight:700"></span></div>').join('')+
+  repCtl(it.k,it.b[0],it.b[1])+'</div>').join('')+
  '<button class="btn btn-ghost" style="margin-top:10px" id="rRe">Relancer</button>'+
  '<button class="btn btn-ghost" style="margin-top:8px" id="rStart">Chrono libre</button>'+
  '<p class="hint" style="margin-top:10px;text-align:center"><a href="#" id="rReset" style="color:var(--muted)">Réinitialiser toute la progression</a></p></div>';
- out.querySelectorAll('[data-adv]').forEach(b=>{b.onclick=()=>{
-  const i=+b.dataset.adv,msg=advance(lastDraw.items[i].k);
-  out.querySelector('[data-msg="'+i+'"]').textContent=msg;b.disabled=true;b.style.opacity=.4}});
+ wireRep(out);
  $('#rReset').onclick=e=>{e.preventDefault();
   if(confirm('Remettre tous les exercices de la roulette à leur version de base, sans charge ?')){store.s('adv',{});lastDraw=drawSession();store.s('roul',lastDraw);renderRoul()}};
  $('#rRe').onclick=()=>{lastDraw=drawSession();store.s('roul',lastDraw);renderRoul()};
@@ -820,6 +868,84 @@ function initRoul(){const row=$('#rEq');
   if(!d){$('#rOut').innerHTML='<p class="hint" style="margin-top:10px">Pas assez d\'exercices avec cette sélection — coche au moins « Sans matériel ».</p>';return}
   lastDraw=d;store.s('roul',d);renderRoul()};
  renderRoul()}
+
+/* ── Semaine ondulée générative ───────────────────────────── */
+/* Les RÔLES restent fixes d'une semaine à l'autre (c'est ce qui fait un programme),
+   les exercices qui les remplissent changent (c'est ce qui évite la lassitude). */
+const UNIT={tractlest:'reps',hspu:'reps',hspuneg:'reps',uneven:'side',flt:'sec',bear:'sec'};
+const SPECIAL={nordic:'3-6',pistol:'3-6 / côté',hspu:'3-6',hspuneg:'3-5',uneven:'3-6 / côté',
+ dragon:'3-8',lsit:'20-30 s',calf:'12-20 / côté',lateral:'12-15',rearfly:'12-15',wrist:'15-20',
+ revcurl:'12-15',deadhang:'30-45 s',poign:'15-20',farmer:'40-60 s',archpull:'5-8 / côté'};
+function unitOf(k){const p=POOL.find(x=>x.k===k);return p?p.u:(UNIT[k]||'reps')}
+const WEEK=[
+{id:'oha',n:"Haut A — FORCE",q:'force',
+ d:"Tirage et poussée lourds. La séance qui fait avancer tractions lestées et HSPU. Jamais la veille d'une séance de doigts.",
+ sl:[["Tirage vertical lourd",['tractlest','tract','archpull','uneven','tractsup']],
+     ["Poussée horizontale lourde",['pompelest','pompedecl','pompearch','diamant']],
+     ["Poussée verticale",['pushpress','pikeel','hspuneg','hspu']],
+     ["Tirage horizontal",['row','rearfly']],
+     ["Bras",['curl','exttri','tractsup','diamant']],
+     ["Avant-bras et grip",['wrist','deadhang','farmer','revcurl','poign']]]},
+{id:'oba',n:"Bas A — VOLUME",q:'hyp',
+ d:"Quadriceps et fessiers en 8-12, tronc en fin de séance. Longue mais peu traumatisante.",
+ sl:[["Quadriceps bilatéral",['squatlest','goblet','squattempo']],
+     ["Quadriceps unilatéral",['bulg','fente','stepsac','stepup','pistol']],
+     ["Fessiers",['hipthrust','ponte','kbswing']],
+     ["Ischio-jambiers",['curlgliss','rdl1','nordic','hinge']],
+     ["Mollets",['calf','sautbox']],
+     ["Tronc — flexion",['legraise','hollowr','dragon','situp','lsit']],
+     ["Tronc — anti-latéral",['gainlat','gainage','hollow','farmer']]]},
+{id:'ohb',n:"Haut B — VOLUME",q:'hyp',
+ d:"Même musculature qu'en Haut A, mais en 8-15 reps et sur d'autres variantes. C'est le volume qui construit la masse.",
+ sl:[["Tirage vertical",['tractsup','tract','archpull','row']],
+     ["Poussée horizontale",['pompedecl','pompe','pompelest','pompetempo']],
+     ["Poussée verticale",['pikeel','pompepiq','pushpress']],
+     ["Triceps",['diamant','dips','exttri']],
+     ["Épaules — deltoïde moyen",['lateral','pushpress']],
+     ["Épaules — deltoïde postérieur",['rearfly','row']],
+     ["Grip et avant-bras",['deadhang','wrist','revcurl','farmer','poign']]]},
+{id:'obb',n:"Bas B — FORCE",q:'force',
+ d:"Chaîne postérieure et unilatéral lourds, placés en début de séance — jamais sur des jambes déjà fatiguées.",
+ sl:[["Charnière de hanche lourde",['hinge','rdl1']],
+     ["Ischio-jambiers dur",['nordic','curlgliss']],
+     ["Unilatéral lourd",['stepsac','bulg','pistol']],
+     ["Quadriceps",['squatlest','goblet','sautbox']],
+     ["Fessiers",['hipthrust','ponte','kbswing']],
+     ["Tronc",['hollow','dragon','legraise','lsit']]]},
+{id:'ofe',n:"Optionnel — FORCE-ENDURANCE",q:'fe',opt:1,
+ d:"Circuit court à caler un jour léger, ou en remplacement quand la semaine déborde. La qualité la plus transférable à une longue voie.",
+ sl:[["Jambes",['squat','fente','stepup','burpee']],
+     ["Poussée",['pompe','pompetempo','dips','pompepiq']],
+     ["Tirage",['row','tract','tractsup']],
+     ["Chaîne postérieure",['ponte','curlgliss','kbswing','superman']],
+     ["Tronc",['gainage','hollow','mount','situp']],
+     ["Cardio",['burpee','mount','sautbox']]]}
+];
+function repsFor(k,q){
+ if(SPECIAL[k]&&q!=='fe')return SPECIAL[k];
+ const u=unitOf(k);
+ if(q==='force')return u==='sec'?'15-20 s':u==='side'?'4-6 / côté':'4-6';
+ if(q==='fe')return u==='sec'?'45-60 s':u==='side'?'15-20 / côté':'15-20';
+ return u==='sec'?'30-40 s':u==='side'?'8-12 / côté':'8-12'}
+function setsFor(q){return q==='force'?rnd(4,5):q==='fe'?3:rnd(3,4)}
+/* Reprend l'état de progression : version plus dure si le plafond a été validé, sinon charge cumulée. */
+function applyAdv(k){const a=getAdv()[k]||{s:0,l:0};
+ return{show:(a.s&&SUB[k])?SUB[k].to:k,load:a.l||0}}
+function makeWeek(prev){
+ const used=new Set(),old=prev&&prev.flat?new Set(prev.flat):new Set(),flat=[];
+ const sessions=WEEK.map(t=>{
+  const it=t.sl.map(function(sl){const role=sl[0],cands=sl[1];
+   let pool=cands.filter(k=>!used.has(k)&&!old.has(k));
+   if(!pool.length)pool=cands.filter(k=>!used.has(k));
+   if(!pool.length)pool=cands;
+   const k=pool[rnd(0,pool.length-1)];used.add(k);flat.push(k);
+   const a=applyAdv(k);
+   return[a.show,setsFor(t.q),repsFor(a.show,t.q),role,a.load]});
+  return{id:t.id,n:t.n,q:t.q,opt:t.opt,d:t.d,it:it}});
+ return{num:(prev&&prev.num?prev.num:0)+1,s:sessions,done:[],flat:flat}}
+function getWeek(){let wk=store.g('week',null);
+ if(!wk||!wk.s)  {wk=makeWeek(null);store.s('week',wk)}
+ return wk}
 
 /* ── Splits : blocs (hypertrophie pure) ou ondulé (force + hypertrophie) ── */
 const SPLITS={
@@ -844,7 +970,7 @@ bloc:{n:'Blocs — hypertrophie',
       ["pistol",3,"3-6 / côté"],["calf",4,"12-20 / côté"],["hollow",3,"30-40 s"]]}]},
 
 ond:{n:'Ondulé — force + hypertrophie',
- note:"Chaque muscle reçoit une exposition LOURDE et une exposition VOLUME dans la même semaine. Tu ne lâches jamais le lourd, et tu gardes le stimulus de masse. À tenir aussi longtemps que tu progresses — pas de date de fin.",
+ note:"Chaque muscle reçoit une exposition <b>LOURDE</b> et une exposition <b>VOLUME</b> dans la même semaine. Les rôles restent identiques d'une semaine à l'autre — c'est ce qui en fait un programme — mais les exercices qui les remplissent changent à chaque nouvelle semaine. Valide chaque séance avec « ✓ Séance faite » : au bout des 4, une nouvelle semaine se tire automatiquement.",
  s:[
  {id:'oha',n:"Haut A — FORCE",q:'force',f:"~60 min · 24 séries · repos 2-3 min",
   d:"Tirage et poussée lourds. La séance qui fait avancer tractions lestées et HSPU. Jamais la veille d'une séance de doigts.",
@@ -868,6 +994,48 @@ ond:{n:'Ondulé — force + hypertrophie',
       ["gainage",3,"45-60 s"],["burpee",3,"15-20"]]}]}
 };
 let splitSel=store.g('splitsel','bloc');
+const QBADGE={force:['FORCE','var(--hot)'],hyp:['VOLUME','var(--cool)'],fe:['FORCE-ENDURANCE','var(--amber)']};
+
+function sessionCard(s,opts){const c=document.createElement('div');c.className='card';
+ const bd=QBADGE[s.q],done=opts&&opts.done;
+ c.innerHTML='<div class="tags" style="margin:0 0 6px"><span class="tag" style="color:'+bd[1]+';border-color:'+bd[1]+'">'+bd[0]+'</span>'+
+  (done?'<span class="tag" style="color:var(--cool);border-color:var(--cool)">✓ FAITE</span>':'')+'</div>'+
+ '<div class="rname"'+(done?' style="opacity:.5"':'')+'>'+s.n+'</div>'+
+ '<div class="rmeta">'+(opts&&opts.meta?opts.meta:'')+'</div>'+
+ '<p style="font-size:12.5px;color:var(--muted);margin-top:6px">'+s.d+'</p>'+
+ '<details'+(done?'':' open')+'><summary>Séance</summary>'+
+  s.it.map(function(x,i){return '<div style="display:flex;gap:8px;font-size:13.5px;padding:5px 0;border-bottom:1px solid var(--line)">'+
+  '<span style="color:var(--muted);font-family:var(--mono);font-size:11.5px;padding-top:2px">'+(i+1)+'</span>'+
+  '<span style="flex:1"><b>'+EX[x[0]][0]+(x[4]?' (+'+x[4]+' kg)':'')+'</b>'+(x[3]?'<span style="display:block;font-size:11px;color:var(--muted)">'+x[3]+'</span>':'')+
+   (opts&&opts.trackable?repCtl(x[0],bounds(x[2])[0],bounds(x[2])[1]):'')+'</span>'+
+  '<span style="font-family:var(--mono);font-size:12px;white-space:nowrap">'+x[1]+' × '+x[2]+'</span></div>'}).join('')+
+ '</details>'+
+ '<details><summary>Exécution des mouvements</summary>'+s.it.map(x=>'<div class="ex"><b>'+EX[x[0]][0]+'</b><p>'+EX[x[0]][1]+'</p></div>').join('')+'</details>'+
+ '<button class="btn btn-ghost" style="margin-top:10px" data-run="1">Lancer — chrono libre</button>'+
+ (opts&&opts.trackable?'<button class="btn btn-ghost" style="margin-top:8px" data-reroll="1">Retirer cette séance</button>':'')+
+ (opts&&opts.trackable?'<button class="btn btn-ghost" style="margin-top:8px" data-done="1">'+(done?'Annuler « faite »':'✓ Séance faite')+'</button>':'');
+ c.querySelector('[data-run]').onclick=()=>openW({n:s.n,
+  s:s.it.map((x,i)=>(i+1)+'. '+EX[x[0]][0]+(x[4]?' (+'+x[4]+' kg)':'')+' — '+x[1]+' × '+x[2]),
+  x:s.it.map(x=>x[0]),tm:{m:'chrono'}});
+ wireRep(c);
+ if(opts&&opts.onReroll){const rb=c.querySelector('[data-reroll]');if(rb)rb.onclick=opts.onReroll}
+ return c}
+/* Retire une seule séance de la semaine, en gardant les autres intactes */
+function rerollSession(id){const wk=getWeek(),t=WEEK.find(x=>x.id===id);if(!t)return;
+ const others=new Set(wk.s.filter(s=>s.id!==id).flatMap(s=>s.it.map(x=>x[0])));
+ const old=new Set(wk.s.find(s=>s.id===id).it.map(x=>x[0])),used=new Set();
+ const it=t.sl.map(function(sl){const cands=sl[1];
+  let pool=cands.filter(k=>!used.has(k)&&!others.has(k)&&!old.has(k));
+  if(!pool.length)pool=cands.filter(k=>!used.has(k)&&!others.has(k));
+  if(!pool.length)pool=cands.filter(k=>!used.has(k));
+  if(!pool.length)pool=cands;
+  const k=pool[rnd(0,pool.length-1)];used.add(k);
+  const a=applyAdv(k);
+  return[a.show,setsFor(t.q),repsFor(a.show,t.q),sl[0],a.load]});
+ wk.s=wk.s.map(s=>s.id===id?Object.assign({},s,{it:it}):s);
+ wk.flat=wk.s.flatMap(s=>s.it.map(x=>x[0]));
+ store.s('week',wk);renderSplit()}
+
 function renderSplit(){const box=$('#split');box.innerHTML='';
  const row=document.createElement('div');row.className='frow';row.style.marginBottom='10px';
  Object.keys(SPLITS).forEach(k=>{const b=document.createElement('button');
@@ -875,28 +1043,87 @@ function renderSplit(){const box=$('#split');box.innerHTML='';
   b.onclick=()=>{splitSel=k;store.s('splitsel',k);renderSplit()};row.appendChild(b)});
  box.appendChild(row);
  const nt=document.createElement('div');nt.className='note';nt.innerHTML=SPLITS[splitSel].note;box.appendChild(nt);
- const badge={force:['FORCE','var(--hot)'],hyp:['VOLUME','var(--cool)'],fe:['FORCE-ENDURANCE','var(--amber)']};
- SPLITS[splitSel].s.forEach(s=>{const c=document.createElement('div');c.className='card';
-  const bd=badge[s.q];
-  c.innerHTML='<div class="tags" style="margin:0 0 6px"><span class="tag" style="color:'+bd[1]+';border-color:'+bd[1]+'">'+bd[0]+'</span></div>'+
-  '<div class="rname">'+s.n+'</div><div class="rmeta">'+s.f+'</div>'+
-  '<p style="font-size:12.5px;color:var(--muted);margin-top:6px">'+s.d+'</p>'+
-  '<details open><summary>Séance</summary>'+
-   s.it.map((x,i)=>'<div style="display:flex;gap:8px;font-size:13.5px;padding:4px 0;border-bottom:1px solid var(--line)">'+
-   '<span style="color:var(--muted);font-family:var(--mono);font-size:11.5px;padding-top:2px">'+(i+1)+'</span>'+
-   '<span style="flex:1"><b>'+EX[x[0]][0]+'</b></span>'+
-   '<span style="font-family:var(--mono);font-size:12px;white-space:nowrap">'+x[1]+' × '+x[2]+'</span></div>').join('')+
-  '</details>'+
-  '<details><summary>Exécution des mouvements</summary>'+s.it.map(x=>'<div class="ex"><b>'+EX[x[0]][0]+'</b><p>'+EX[x[0]][1]+'</p></div>').join('')+'</details>'+
-  '<button class="btn btn-ghost" style="margin-top:10px">Lancer — chrono libre</button>';
-  c.querySelector('button').onclick=()=>openW({n:s.n,
-   s:s.it.map((x,i)=>(i+1)+'. '+EX[x[0]][0]+' — '+x[1]+' × '+x[2]),
-   x:s.it.map(x=>x[0]),tm:{m:'chrono'}});
+
+ if(splitSel==='bloc'){SPLITS.bloc.s.forEach(s=>box.appendChild(sessionCard(s,{meta:s.f})));return}
+
+ /* ondulé : semaine générée, suivi des séances faites */
+ const wk=getWeek(),oblig=wk.s.filter(s=>!s.opt),nd=oblig.filter(s=>wk.done.indexOf(s.id)>=0).length;
+ const hd=document.createElement('div');hd.className='card';
+ hd.style.cssText='background:var(--ink);color:#F7F5F1;border-color:var(--ink)';
+ hd.innerHTML='<div style="display:flex;align-items:center;gap:10px">'+
+  '<div style="flex:1"><div style="font-weight:800;font-size:15px">Semaine '+wk.num+'</div>'+
+  '<div style="font-size:12.5px;color:rgba(247,245,241,.65);margin-top:2px">'+nd+' séance'+(nd>1?'s':'')+' sur 4 validée'+(nd>1?'s':'')+
+  (nd===4?' — nouvelle semaine tirée !':'')+'</div></div>'+
+  '<div style="font-family:var(--mono);font-size:22px;font-weight:700">'+nd+'/4</div></div>'+
+  '<div style="display:flex;gap:4px;margin-top:10px">'+oblig.map(s=>'<div style="flex:1;height:5px;border-radius:3px;background:'+
+   (wk.done.indexOf(s.id)>=0?'#E4B36A':'rgba(247,245,241,.2)')+'"></div>').join('')+'</div>'+
+  '<button class="btn" id="newWeek" style="background:none;border:1.5px solid rgba(247,245,241,.3);color:#F7F5F1;margin-top:12px;padding:10px;font-size:13px">Tirer une nouvelle semaine maintenant</button>';
+ box.appendChild(hd);
+ $('#newWeek').onclick=()=>{if(confirm('Abandonner la semaine en cours et en tirer une nouvelle ?')){
+  store.s('week',makeWeek(wk));renderSplit()}};
+
+ wk.s.forEach(s=>{const done=wk.done.indexOf(s.id)>=0;
+  const c=sessionCard(s,{done:done,trackable:!s.opt,onReroll:()=>rerollSession(s.id),
+   meta:(s.q==='force'?'repos 2-3 min':s.q==='fe'?'en circuit · repos 30-45 s':'repos 60-90 s')+' · '+s.it.reduce((a,b)=>a+b[1],0)+' séries'});
+  const db=c.querySelector('[data-done]');
+  if(db)db.onclick=()=>{const w2=getWeek(),i=w2.done.indexOf(s.id);
+   if(i>=0)w2.done.splice(i,1);else w2.done.push(s.id);
+   if(w2.done.length>=4){store.s('week',makeWeek(w2))}else{store.s('week',w2)}
+   renderSplit();window.scrollTo(0,0)};
   box.appendChild(c)})}
+
+/* ── Bibliothèque de mouvements ───────────────────────────── */
+const CATN={tirage:'Tirage',poussee:'Poussée',jambes:'Jambes',post:'Chaîne postérieure',
+ tronc:'Tronc',bras:'Bras & avant-bras'};
+let libCat=null,libQ='';
+function catOf(k){const p=POOL.find(x=>x.k===k);return p?p.c:null}
+function libCard(k,hl){const a=getAdv()[k]||{};
+ return '<div class="card"'+(hl?' style="border-color:var(--amber);border-width:2px"':'')+'>'+
+ '<div class="rname">'+EX[k][0]+(a.l?' (+'+a.l+' kg)':'')+'</div>'+
+ (catOf(k)?'<div class="rmeta">'+CATN[catOf(k)]+(a.last?' · dernière fois : '+a.last:'')+'</div>':'')+
+ '<p style="font-size:13px;color:var(--muted);margin-top:6px">'+EX[k][1]+'</p>'+
+ (SUB[k]?'<p class="hint" style="margin-top:6px">Progression → '+EX[SUB[k].to][0]+'</p>':'')+'</div>'}
+function renderLib(hlKey){const out=$('#libOut');
+ const keys=Object.keys(EX).filter(k=>{
+  if(libCat&&catOf(k)!==libCat)return false;
+  if(libQ&&EX[k][0].toLowerCase().indexOf(libQ)<0&&EX[k][1].toLowerCase().indexOf(libQ)<0)return false;
+  return true}).sort((a,b)=>EX[a][0].localeCompare(EX[b][0],'fr'));
+ out.innerHTML=(hlKey?libCard(hlKey,1):'')+
+  '<h2>'+keys.length+' mouvement'+(keys.length>1?'s':'')+'</h2>'+
+  (keys.length?keys.map(k=>libCard(k)).join(''):'<p class="hint">Aucun mouvement ne correspond.</p>')}
+function initLib(){const row=$('#libCat');
+ const all=document.createElement('button');all.className='chip on';all.textContent='Tout';
+ all.onclick=()=>{libCat=null;paintLib();renderLib()};row.appendChild(all);
+ Object.keys(CATN).forEach(c=>{const b=document.createElement('button');b.className='chip';b.textContent=CATN[c];
+  b.onclick=()=>{libCat=libCat===c?null:c;paintLib();renderLib()};row.appendChild(b)});
+ $('#libQ').oninput=e=>{libQ=e.target.value.trim().toLowerCase();renderLib()};
+ $('#libGo').onclick=()=>{const ks=Object.keys(EX);renderLib(ks[rnd(0,ks.length-1)]);window.scrollTo(0,0)};
+ renderLib()}
+function paintLib(){const bs=$('#libCat').querySelectorAll('.chip');
+ bs[0].classList.toggle('on',libCat===null);
+ Object.keys(CATN).forEach((c,i)=>bs[i+1].classList.toggle('on',libCat===c))}
+
+/* ── Tirage d'une séance au hasard ────────────────────────── */
+function filteredW(){return W.filter(w=>(!fDur||fDur===w.d)&&(!fEq||w.eq.includes(fEq))
+ &&(!fCtx||w.v)&&(!fType||(w.t||'oppo')===fType))}
+function drawWod(){const c=filteredW();const out=$('#wodOut');
+ if(!c.length){out.innerHTML='<p class="hint" style="margin:10px 0">Aucune séance ne passe tes filtres actuels — élargis-les juste en dessous.</p>';return}
+ const w=c[rnd(0,c.length-1)];
+ out.innerHTML='<div class="card" style="border-color:var(--amber);border-width:2px">'+
+ '<div class="tags" style="margin:0 0 6px">'+(w.t==='bench'?'<span class="tag bench">Benchmark</span>':'')+
+  (w.v?'<span class="tag trip">Voyage</span>':'')+'<span class="tag dur">'+DUR[w.d]+'</span>'+
+  w.eq.map(e=>'<span class="tag">'+EQ[e]+'</span>').join('')+'</div>'+
+ '<div class="rname">'+w.n+'</div><div class="rmeta">'+w.f+'</div>'+
+ '<ol class="steps" style="margin-top:8px">'+w.s.map(s=>'<li>'+s+'</li>').join('')+'</ol>'+
+ '<details><summary>Exécution des mouvements</summary>'+w.x.map(k=>'<div class="ex"><b>'+EX[k][0]+'</b><p>'+EX[k][1]+'</p></div>').join('')+'</details>'+
+ '<button class="btn btn-primary" style="margin-top:10px" id="wodRun">'+fmt(w.tm)+'</button>'+
+ '<button class="btn btn-ghost" style="margin-top:8px" id="wodRe">Tirer une autre</button></div>';
+ $('#wodRun').onclick=()=>openW(w);
+ $('#wodRe').onclick=drawWod}
 
 /* ── Navigation ───────────────────────────────────────────── */
 const VIEWS={home:'Opportuniste',roul:'Roulette',split:'Split',sess:'Séances & WOD',
- prog:'Programmes évolutifs',hist:'Historique',aide:'Substitutions'};
+ prog:'Programmes évolutifs',lib:'Mouvements',hist:'Historique',aide:'Substitutions'};
 function go(v,push){if(!VIEWS[v])v='home';
  document.querySelectorAll('.view').forEach(s=>s.classList.toggle('on',s.id==='v-'+v));
  $('#tbTitle').textContent=VIEWS[v];
