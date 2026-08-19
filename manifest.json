@@ -1,18 +1,17 @@
 {
-  "name": "Opportuniste — Séances grimpeur-alpiniste",
-  "short_name": "Opportuniste",
-  "description": "48 séances, WOD, benchmarks et 2 programmes évolutifs, avec minuteurs guidés. Hors ligne.",
-  "lang": "fr",
+  "name": "Tour de Bourgogne à vélo — 14 jours en famille",
+  "short_name": "Bourgogne Vélo",
+  "description": "Itinérance vélo 14 jours au départ de Saint-Jean-de-Losne · 16–29 août 2026",
   "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",
   "orientation": "portrait",
-  "background_color": "#F7F5F1",
-  "theme_color": "#F7F5F1",
+  "background_color": "#08252e",
+  "theme_color": "#08252e",
+  "lang": "fr",
   "icons": [
-    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png" },
-    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png" },
-    { "src": "icon-maskable-192.png", "sizes": "192x192", "type": "image/png", "purpose": "maskable" },
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
     { "src": "icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
   ]
 }
